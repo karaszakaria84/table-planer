@@ -1,0 +1,4094 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Planner</title>
+    <style>
+        /* =========================================================
+           CSS كامل
+           ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --background: #061016;
+            --background-2: #0a1820;
+            --card: #0d2028;
+            --panel: #09171e;
+            --panel-light: #102a31;
+            --cyan: #22d3ee;
+            --cyan-dark: #0891b2;
+            --green: #10b981;
+            --green-light: #34d399;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --pink: #f472b6;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+            --purple-light: #a78bfa;
+            --orange: #f97316;
+            --white: #f8fafc;
+            --text: #dbeafe;
+            --muted: #8fa7b5;
+            --border: rgba(255, 255, 255, 0.09);
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--white);
+            background:
+                radial-gradient(circle at 5% 10%, rgba(16, 185, 129, 0.18), transparent 27%),
+                radial-gradient(circle at 95% 10%, rgba(34, 211, 238, 0.18), transparent 27%),
+                radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.12), transparent 25%),
+                radial-gradient(circle at 10% 90%, rgba(59, 130, 246, 0.13), transparent 25%),
+                linear-gradient(135deg, #040b10, #07151c 50%, #061016);
+            overflow: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            top: -250px;
+            left: 35%;
+            border-radius: 50%;
+            background: rgba(34, 211, 238, 0.08);
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            bottom: -220px;
+            right: 30%;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.08);
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard-card {
+            position: relative;
+            width: min(1200px, 96vw);
+            height: min(760px, 92vh);
+            padding: 11px;
+            display: flex;
+            background: linear-gradient(145deg, #112b32, #0a1b22 50%, #10251f);
+            border: 1px solid rgba(34, 211, 238, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), 0 0 70px rgba(16, 185, 129, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            animation: dashboardEnter 0.65s ease;
+            z-index: 1;
+        }
+
+        @keyframes dashboardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .top-buttons {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .dev-toggle-btn {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 43px;
+            padding: 9px 16px;
+            color: #dffcff;
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.20), rgba(16, 185, 129, 0.16));
+            border: 1px solid rgba(34, 211, 238, 0.20);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .dev-toggle-btn:hover {
+            transform: translateY(-3px);
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.35), rgba(16, 185, 129, 0.30));
+            border-color: rgba(34, 211, 238, 0.60);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.18);
+        }
+
+        .dev-toggle-btn:active {
+            transform: scale(0.97);
+        }
+
+        .main-section {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 45px 20px;
+            color: var(--white);
+            background: linear-gradient(145deg, #0c2028, #08161d 55%, #0d1f1b);
+            border: 1px solid rgba(34, 211, 238, 0.10);
+            border-radius: 21px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+
+        /* =========================================================
+           AUTH BOX
+           ========================================================= */
+        .auth-box {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 25px;
+            text-align: center;
+            animation: contentEnter 0.4s ease;
+        }
+
+        .auth-box.hidden {
+            display: none;
+        }
+
+        @keyframes contentEnter {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-box h2 {
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 850;
+            color: var(--cyan);
+            text-shadow: 0 0 25px rgba(34, 211, 238, 0.16);
+        }
+
+        .auth-description {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .brand-mini {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 17px;
+            color: #ecfeff;
+            background: #0b2028;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            border-radius: 13px;
+            outline: none;
+            font-size: 14px;
+            transition: 0.25s ease;
+        }
+
+        input::placeholder {
+            color: #66818c;
+        }
+
+        input:hover {
+            border-color: rgba(34, 211, 238, 0.35);
+        }
+
+        input:focus {
+            background: #0d2630;
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.08), 0 0 25px rgba(34, 211, 238, 0.07);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            color: #ffffff;
+            background: linear-gradient(100deg, #0891b2, #0d9488 50%, #10b981);
+            border: none;
+            border-radius: 13px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 28px rgba(16, 185, 129, 0.20);
+            transition: 0.25s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.10);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.30), 0 0 25px rgba(34, 211, 238, 0.12);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.30);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.25s ease;
+        }
+
+        .btn-secondary:hover {
+            color: white;
+            background: rgba(239, 68, 68, 0.16);
+            border-color: var(--red);
+            transform: translateY(-2px);
+        }
+
+        .switch-text {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .switch-text a {
+            color: var(--cyan);
+            text-decoration: none;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .switch-text a:hover {
+            color: var(--green-light);
+            text-shadow: 0 0 15px rgba(52, 211, 153, 0.35);
+        }
+
+        /* =========================================================
+           MODAL
+           ========================================================= */
+        .modal {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: rgba(2, 8, 12, 0.78);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 1000;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            position: relative;
+            width: min(440px, 92vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            text-align: center;
+            color: var(--white);
+            background: linear-gradient(145deg, #12303a, #0c2028 55%, #12291f);
+            border: 1px solid rgba(34, 211, 238, 0.18);
+            border-radius: 24px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), 0 0 60px rgba(16, 185, 129, 0.08);
+            animation: modalEnter 0.3s ease;
+        }
+
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #78909c;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+            background: var(--red);
+            border-color: var(--red);
+            transform: scale(1.05);
+        }
+
+        .about-app {
+            margin: 18px 0;
+            padding: 15px;
+            color: #b8cdd5;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.07), rgba(16, 185, 129, 0.07));
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .yt-button {
+            display: block;
+            padding: 13px;
+            color: #ffffff;
+            background: linear-gradient(100deg, #dc2626, #ef4444, #f472b6);
+            text-decoration: none;
+            border-radius: 13px;
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.20);
+            transition: 0.25s ease;
+        }
+
+        .yt-button:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.08);
+            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.28);
+        }
+
+        .program-help-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 43px;
+            padding: 9px 16px;
+            color: #fff7ed;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(244, 114, 182, 0.16));
+            border: 1px solid rgba(245, 158, 11, 0.28);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .program-help-button:hover {
+            transform: translateY(-3px);
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(244, 114, 182, 0.28));
+            border-color: rgba(245, 158, 11, 0.65);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.18);
+        }
+
+        .program-help-button:active {
+            transform: scale(0.97);
+        }
+
+        .program-help-item {
+            padding: 15px;
+            color: #cbd5e1;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.07), rgba(16, 185, 129, 0.07));
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            border-radius: 14px;
+            line-height: 1.8;
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .program-help-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--cyan);
+            font-size: 14px;
+        }
+
+        .settings-list {
+            margin-top: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 15px;
+            color: #c6d7dd;
+            background: linear-gradient(135deg, #102830, #0d2228);
+            border: 1px solid rgba(34, 211, 238, 0.09);
+            border-radius: 14px;
+            font-size: 14px;
+            transition: 0.25s ease;
+        }
+
+        .setting-item:hover {
+            transform: translateX(-3px);
+            border-color: rgba(34, 211, 238, 0.28);
+            background: linear-gradient(135deg, #123039, #102a24);
+        }
+
+        .btn-setting {
+            padding: 8px 13px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0891b2, #0d9488);
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .btn-setting:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(6, 182, 212, 0.20);
+        }
+
+        .language-select {
+            min-width: 110px;
+            padding: 8px 11px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border: none;
+            border-radius: 9px;
+            outline: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .language-select:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .language-select option {
+            color: #ffffff;
+            background: #172554;
+        }
+
+        .btn-danger {
+            padding: 8px 13px;
+            color: white;
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(239, 68, 68, 0.22);
+        }
+
+        .select-setting {
+            padding: 8px 10px;
+            color: #d9faff;
+            background: #0b2028;
+            border: 1px solid rgba(34, 211, 238, 0.15);
+            border-radius: 9px;
+            outline: none;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .select-setting:hover {
+            border-color: rgba(34, 211, 238, 0.4);
+        }
+
+        /* =========================================================
+           CREATOR AVATARS - دايرتين جمب بعض
+           ========================================================= */
+        .creator-avatars-side {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 10px 0 18px 0;
+            flex-wrap: wrap;
+        }
+
+        .creator-avatar-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .creator-avatar-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            padding: 4px;
+            background: conic-gradient(var(--cyan), var(--green), var(--gold), var(--pink), var(--cyan));
+            box-shadow: 0 0 30px rgba(34, 211, 238, 0.20);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .creator-avatar-circle:hover {
+            transform: scale(1.06) translateY(-4px);
+            box-shadow: 0 0 45px rgba(34, 211, 238, 0.35);
+        }
+
+        .creator-avatar-circle .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #0c2028;
+            background: linear-gradient(135deg, #1a3a44, #0d2630);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--cyan);
+            font-weight: 800;
+        }
+
+        .creator-avatar-circle .avatar-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .creator-avatar-box:first-child .avatar-label {
+            color: var(--cyan);
+            border-color: rgba(34, 211, 238, 0.15);
+        }
+
+        .creator-avatar-box:last-child .avatar-label {
+            color: var(--gold);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+
+        .creator-avatar-box:first-child .creator-avatar-circle {
+            background: conic-gradient(var(--cyan), var(--blue), var(--purple), var(--pink), var(--cyan));
+            box-shadow: 0 0 30px rgba(34, 211, 238, 0.20);
+        }
+
+        .creator-avatar-box:first-child .creator-avatar-circle:hover {
+            box-shadow: 0 0 45px rgba(34, 211, 238, 0.35);
+        }
+
+        .creator-avatar-box:last-child .creator-avatar-circle {
+            background: conic-gradient(var(--gold), var(--orange), var(--red), var(--pink), var(--gold));
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.20);
+        }
+
+        .creator-avatar-box:last-child .creator-avatar-circle:hover {
+            box-shadow: 0 0 45px rgba(245, 158, 11, 0.35);
+        }
+
+        /* =========================================================
+           PLANNER PAGE - مع التمرير للأسفل
+           ========================================================= */
+        #profilePage {
+            width: 100%;
+            height: 100%;
+            padding: 18px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #profilePage.hidden {
+            display: none;
+        }
+
+        #profilePage::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #profilePage::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+
+        #profilePage::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.25);
+            border-radius: 10px;
+        }
+
+        #profilePage::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 211, 238, 0.40);
+        }
+
+        .planner-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            min-height: 74px;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.13), rgba(16, 185, 129, 0.10), rgba(59, 130, 246, 0.08));
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            border-radius: 18px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+
+        .planner-header::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            top: -100px;
+            right: 10%;
+            border-radius: 50%;
+            background: rgba(34, 211, 238, 0.10);
+            filter: blur(45px);
+            pointer-events: none;
+        }
+
+        .planner-header-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .planner-eyebrow {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        #welcomeUser {
+            color: var(--cyan);
+            font-size: 21px;
+            font-weight: 850;
+        }
+
+        .planner-header-text p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .header-actions {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 5;
+        }
+
+        .header-action-btn {
+            min-width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            color: #c9eaf0;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 750;
+            transition: 0.25s ease;
+        }
+
+        .header-action-btn:hover {
+            color: #ffffff;
+            background: rgba(34, 211, 238, 0.12);
+            border-color: rgba(34, 211, 238, 0.30);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(34, 211, 238, 0.10);
+        }
+
+        .logout-button {
+            min-width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            color: #c9eaf0;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 750;
+            transition: 0.25s ease;
+        }
+
+        .logout-button:hover {
+            color: #ffffff;
+            background: rgba(239, 68, 68, 0.13);
+            border-color: rgba(239, 68, 68, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .date-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.065);
+            border-radius: 14px;
+            margin-top: 12px;
+        }
+
+        .current-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .current-date #currentDateNumber {
+            font-size: 22px;
+            font-weight: 850;
+            color: var(--cyan);
+        }
+
+        .current-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .current-time #liveClock {
+            color: var(--white);
+            font-size: 20px;
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* =========================================================
+           STATS
+           ========================================================= */
+        .planner-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat-card {
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.065);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.25s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.055);
+            border-color: rgba(34, 211, 238, 0.15);
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+
+        .stat-icon.cyan {
+            background: rgba(34, 211, 238, 0.12);
+        }
+        .stat-icon.gold {
+            background: rgba(245, 158, 11, 0.12);
+        }
+        .stat-icon.green {
+            background: rgba(16, 185, 129, 0.12);
+        }
+        .stat-icon.pink {
+            background: rgba(244, 114, 182, 0.12);
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 20px;
+            font-weight: 850;
+            color: var(--white);
+        }
+
+        .stat-card span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================================================
+           WEEK SECTION
+           ========================================================= */
+        .week-section {
+            margin-top: 14px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .section-eyebrow {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .section-header h2 {
+            color: var(--white);
+            font-size: 18px;
+            font-weight: 850;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* =========================================================
+           BUTTONS STYLES - أزرار الإضافة
+           ========================================================= */
+        .outline-add-btn {
+            padding: 8px 16px;
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.06);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .outline-add-btn:hover {
+            background: rgba(34, 211, 238, 0.14);
+            border-color: rgba(34, 211, 238, 0.50);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 211, 238, 0.10);
+        }
+
+        .outline-add-btn:active {
+            transform: scale(0.97);
+        }
+
+        .primary-add-btn {
+            padding: 8px 18px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0891b2, #0d9488 55%, #10b981);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            box-shadow: 0 8px 22px rgba(16, 185, 129, 0.18);
+            transition: 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .primary-add-btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.10);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28);
+        }
+
+        .primary-add-btn:active {
+            transform: scale(0.97);
+        }
+
+        .icon-add-btn {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.08);
+            border: 1px solid rgba(34, 211, 238, 0.20);
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            transition: 0.25s ease;
+        }
+
+        .icon-add-btn:hover {
+            background: rgba(34, 211, 238, 0.16);
+            border-color: rgba(34, 211, 238, 0.45);
+            transform: scale(1.08) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(34, 211, 238, 0.10);
+        }
+
+        .icon-add-btn:active {
+            transform: scale(0.95);
+        }
+
+        .empty-action-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.08);
+            border: 1px solid rgba(34, 211, 238, 0.15);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: 0.25s ease;
+        }
+
+        .empty-action-btn:hover {
+            background: rgba(34, 211, 238, 0.16);
+            border-color: rgba(34, 211, 238, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .days-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 2px 10px;
+            scrollbar-width: thin;
+        }
+
+        .days-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .days-container::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.25);
+            border-radius: 20px;
+        }
+
+        .day-card {
+            min-width: 80px;
+            padding: 12px 10px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.065);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .day-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.055);
+            border-color: rgba(34, 211, 238, 0.15);
+        }
+
+        .day-card.active {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.25), rgba(16, 185, 129, 0.18));
+            border-color: rgba(34, 211, 238, 0.28);
+            box-shadow: 0 7px 22px rgba(8, 145, 178, 0.12);
+        }
+
+        .day-card .day-number {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .day-card strong {
+            display: block;
+            color: var(--white);
+            font-size: 14px;
+            margin: 3px 0;
+        }
+
+        .day-card small {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .day-card.active strong {
+            color: var(--cyan);
+        }
+
+        /* =========================================================
+           PLANNER MAIN GRID
+           ========================================================= */
+        .planner-main-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .planner-panel {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.065);
+            border-radius: 14px;
+            padding: 14px;
+            min-height: 200px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .panel-header h2 {
+            color: var(--white);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .daily-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 3px;
+        }
+
+        .daily-timeline::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .daily-timeline::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.20);
+            border-radius: 20px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-state-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state h3 {
+            color: var(--white);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .empty-state.compact {
+            padding: 15px;
+        }
+
+        .empty-state.compact .empty-state-icon {
+            font-size: 24px;
+        }
+
+        .goals-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .goals-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .goals-container::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.20);
+            border-radius: 20px;
+        }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: 0.2s ease;
+        }
+
+        .goal-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .goal-item .goal-check {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .goal-item .goal-check:hover {
+            border-color: var(--cyan);
+        }
+
+        .goal-item .goal-text {
+            flex: 1;
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .goal-item .goal-edit,
+        .goal-item .goal-delete {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .goal-item .goal-edit:hover {
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .goal-item .goal-delete:hover {
+            color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .goal-item.completed .goal-text {
+            text-decoration: line-through;
+            color: var(--muted);
+        }
+
+        .goal-item.completed .goal-check {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+        }
+
+        /* =========================================================
+           LESSONS SECTION
+           ========================================================= */
+        .planner-section {
+            margin-top: 14px;
+        }
+
+        .lessons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+
+        .lessons-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .lessons-container::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.20);
+            border-radius: 20px;
+        }
+
+        .lesson-card {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            transition: 0.25s ease;
+        }
+
+        .lesson-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(34, 211, 238, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .lesson-card .lesson-number {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(139, 92, 246, 0.12);
+            border-radius: 8px;
+            color: var(--purple-light);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .lesson-card .lesson-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .lesson-card .lesson-main h4 {
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .lesson-card .lesson-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 10px;
+            margin-top: 3px;
+        }
+
+        .lesson-card .lesson-meta span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .lesson-card .lesson-main p {
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        .lesson-card .lesson-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .lesson-card .lesson-actions button {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .lesson-card .lesson-actions .lesson-complete:hover {
+            color: var(--green);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .lesson-card .lesson-actions .lesson-edit:hover {
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .lesson-card .lesson-actions .lesson-delete:hover {
+            color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .lesson-card.completed {
+            opacity: 0.6;
+        }
+
+        .lesson-card.completed .lesson-main h4 {
+            text-decoration: line-through;
+        }
+
+        /* =========================================================
+           TERM LESSONS
+           ========================================================= */
+        .term-planner-section {
+            margin-top: 14px;
+        }
+
+        .term-overview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .term-overview-card {
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .term-overview-card span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .term-overview-card strong {
+            display: block;
+            color: var(--cyan);
+            font-size: 18px;
+            font-weight: 850;
+        }
+
+        .term-lessons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .term-lessons-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .term-lessons-container::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.20);
+            border-radius: 20px;
+        }
+
+        /* =========================================================
+           NOTES SECTION
+           ========================================================= */
+        .notes-section {
+            margin-top: 14px;
+            margin-bottom: 20px;
+        }
+
+        .notes-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .notes-container .note-card {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            transition: 0.25s ease;
+            position: relative;
+        }
+
+        .notes-container .note-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(34, 211, 238, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .notes-container .note-card .note-pin {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 14px;
+        }
+
+        .notes-container .note-card .note-content h4 {
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 800;
+            padding-right: 20px;
+        }
+
+        .notes-container .note-card .note-content p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.6;
+            margin-top: 5px;
+        }
+
+        .notes-container .note-card .note-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+
+        .notes-container .note-card .note-actions button {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .notes-container .note-card .note-actions .note-edit:hover {
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .notes-container .note-card .note-actions .note-delete:hover {
+            color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        /* =========================================================
+           EVENT CARD
+           ========================================================= */
+        .event-card {
+            display: grid;
+            grid-template-columns: 55px 4px minmax(0, 1fr) auto;
+            gap: 8px;
+            min-height: 68px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            transition: 0.25s ease;
+        }
+
+        .event-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(34, 211, 238, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .event-card.completed {
+            opacity: 0.6;
+        }
+
+        .event-card.completed .event-title {
+            text-decoration: line-through;
+        }
+
+        .event-time {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .event-time-start {
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .event-time-end {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .event-color {
+            width: 4px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, var(--cyan), var(--green));
+        }
+
+        .event-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .event-title {
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 800;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .event-description {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.5;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .event-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 5px;
+            font-size: 8px;
+            font-weight: 700;
+            margin-top: 3px;
+        }
+
+        .event-actions {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .event-action {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .event-action:hover {
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .event-action.delete-btn:hover {
+            color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        /* =========================================================
+           FORM STYLES
+           ========================================================= */
+        .event-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .event-form input,
+        .event-form select,
+        .event-form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            color: #ecfeff;
+            background: #0b2028;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            border-radius: 10px;
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            transition: 0.25s ease;
+        }
+
+        .event-form input:focus,
+        .event-form select:focus,
+        .event-form textarea:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
+        }
+
+        .event-form textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .event-form select option {
+            color: #ffffff;
+            background: #0b2028;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .form-submit {
+            flex: 1;
+            padding: 11px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0891b2, #10b981);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            transition: 0.25s ease;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+        }
+
+        .form-cancel {
+            padding: 11px 18px;
+            color: #c2d2d8;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 750;
+            transition: 0.25s ease;
+        }
+
+        .form-cancel:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* =========================================================
+           LIGHT MODE
+           ========================================================= */
+        body.light-mode {
+            color: #12303a;
+            background:
+                radial-gradient(circle at 5% 10%, rgba(16, 185, 129, 0.20), transparent 25%),
+                radial-gradient(circle at 95% 10%, rgba(34, 211, 238, 0.20), transparent 25%),
+                radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.15), transparent 25%),
+                linear-gradient(135deg, #ecfeff, #ecfdf5, #fffbeb);
+        }
+
+        body.light-mode .dashboard-card {
+            background: linear-gradient(145deg, #ffffff, #ecfeff 55%, #ecfdf5);
+            border-color: rgba(6, 182, 212, 0.20);
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.16);
+        }
+
+        body.light-mode .main-section {
+            color: #12303a;
+            background: linear-gradient(145deg, #f8ffff, #ecfeff, #f0fdf4);
+            border-color: rgba(6, 182, 212, 0.12);
+        }
+
+        body.light-mode .dev-toggle-btn {
+            color: #075985;
+            background: linear-gradient(135deg, #ecfeff, #ecfdf5);
+            border-color: rgba(6, 182, 212, 0.22);
+        }
+
+        body.light-mode .auth-box h2 {
+            color: #0891b2;
+            text-shadow: none;
+        }
+
+        body.light-mode input {
+            color: #12303a;
+            background: #ffffff;
+            border-color: #cbd5e1;
+        }
+
+        body.light-mode input::placeholder {
+            color: #64748b;
+        }
+
+        body.light-mode .modal-content {
+            color: #12303a;
+            background: linear-gradient(145deg, #ffffff, #ecfeff, #ecfdf5);
+            border-color: rgba(6, 182, 212, 0.20);
+        }
+
+        body.light-mode .setting-item {
+            color: #334155;
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .planner-header {
+            background: linear-gradient(135deg, #ffffff, #ecfeff, #f0fdf4);
+            border-color: #dbeafe;
+        }
+
+        body.light-mode #welcomeUser {
+            color: #0891b2;
+        }
+
+        body.light-mode .day-card strong {
+            color: #12303a;
+        }
+
+        body.light-mode .day-card.active {
+            background: linear-gradient(135deg, #ecfeff, #ecfdf5);
+            border-color: #a5f3fc;
+        }
+
+        body.light-mode .day-card.active strong {
+            color: #075985;
+        }
+
+        body.light-mode .stat-card strong {
+            color: #12303a;
+        }
+
+        body.light-mode .panel-header h2 {
+            color: #12303a;
+        }
+
+        body.light-mode .section-header h2 {
+            color: #12303a;
+        }
+
+        body.light-mode .lesson-card .lesson-main h4 {
+            color: #12303a;
+        }
+
+        body.light-mode .notes-container .note-card .note-content h4 {
+            color: #12303a;
+        }
+
+        body.light-mode .goal-item .goal-text {
+            color: #12303a;
+        }
+
+        body.light-mode .empty-state h3 {
+            color: #12303a;
+        }
+
+        body.light-mode .current-time #liveClock {
+            color: #12303a;
+        }
+
+        body.light-mode .current-date #currentDateNumber {
+            color: #0891b2;
+        }
+
+        body.light-mode .event-time-start {
+            color: #12303a;
+        }
+
+        body.light-mode .event-title {
+            color: #12303a;
+        }
+
+        body.light-mode .creator-avatar-circle .avatar-placeholder {
+            border-color: #ffffff;
+            background: linear-gradient(135deg, #f8fafc, #ecfeff);
+        }
+
+        body.light-mode .creator-avatar-box:first-child .creator-avatar-circle {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.10);
+        }
+
+        body.light-mode .creator-avatar-box:last-child .creator-avatar-circle {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.10);
+        }
+
+        body.light-mode .avatar-label {
+            color: #64748b;
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .creator-avatar-box:first-child .avatar-label {
+            color: #0891b2;
+            border-color: #a5f3fc;
+        }
+
+        body.light-mode .creator-avatar-box:last-child .avatar-label {
+            color: #d97706;
+            border-color: #fde68a;
+        }
+
+        body.light-mode .outline-add-btn {
+            color: #0891b2;
+            border-color: rgba(6, 182, 212, 0.30);
+        }
+
+        body.light-mode .outline-add-btn:hover {
+            background: rgba(6, 182, 212, 0.08);
+            border-color: rgba(6, 182, 212, 0.50);
+        }
+
+        body.light-mode .event-form input,
+        body.light-mode .event-form select,
+        body.light-mode .event-form textarea {
+            color: #12303a;
+            background: #ffffff;
+            border-color: #cbd5e1;
+        }
+
+        body.light-mode .event-form select option {
+            color: #12303a;
+            background: #ffffff;
+        }
+
+        /* =========================================================
+           MOBILE
+           ========================================================= */
+        @media (max-width: 700px) {
+            body {
+                padding: 10px;
+            }
+
+            .dashboard-card {
+                width: 100%;
+                height: 96vh;
+                padding: 7px;
+                border-radius: 21px;
+            }
+
+            .main-section {
+                border-radius: 17px;
+                padding: 75px 10px 20px;
+            }
+
+            .top-buttons {
+                top: 17px;
+                left: 17px;
+                gap: 7px;
+            }
+
+            .dev-toggle-btn,
+            .program-help-button {
+                min-height: 38px;
+                padding: 7px 11px;
+                font-size: 11px;
+            }
+
+            .auth-box {
+                max-width: 100%;
+                padding: 15px;
+            }
+
+            .auth-box h2 {
+                font-size: 23px;
+            }
+
+            .modal-content {
+                width: 94%;
+                max-height: 92vh;
+                padding: 25px 18px;
+                border-radius: 20px;
+            }
+
+            #profilePage {
+                padding: 7px;
+            }
+
+            .planner-header {
+                min-height: 64px;
+                padding: 10px;
+                border-radius: 14px;
+                flex-wrap: wrap;
+            }
+
+            #welcomeUser {
+                font-size: 16px;
+            }
+
+            .planner-header-text p {
+                font-size: 10px;
+            }
+
+            .header-actions {
+                gap: 4px;
+            }
+
+            .header-action-btn {
+                min-width: 34px;
+                height: 34px;
+                padding: 0 8px;
+                font-size: 10px;
+            }
+
+            .logout-button {
+                min-width: 34px;
+                height: 34px;
+                padding: 0 8px;
+                font-size: 10px;
+            }
+
+            .planner-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .planner-main-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .term-overview {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .notes-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .date-bar {
+                flex-direction: row;
+                padding: 8px 12px;
+            }
+
+            .current-date {
+                font-size: 12px;
+            }
+
+            .current-date #currentDateNumber {
+                font-size: 18px;
+            }
+
+            .current-time #liveClock {
+                font-size: 16px;
+            }
+
+            .days-container {
+                gap: 5px;
+            }
+
+            .day-card {
+                min-width: 60px;
+                padding: 8px 6px;
+            }
+
+            .day-card strong {
+                font-size: 11px;
+            }
+
+            .day-card .day-number {
+                font-size: 8px;
+            }
+
+            .section-header h2 {
+                font-size: 15px;
+            }
+
+            .creator-avatars-side {
+                gap: 20px;
+            }
+
+            .creator-avatar-circle {
+                width: 75px;
+                height: 75px;
+            }
+
+            .creator-avatar-circle .avatar-placeholder {
+                font-size: 26px;
+                border-width: 2.5px;
+            }
+
+            .avatar-label {
+                font-size: 10px;
+                padding: 2px 10px;
+            }
+
+            .event-card {
+                grid-template-columns: 48px 3px minmax(0, 1fr) auto;
+                gap: 6px;
+                min-height: 60px;
+                padding: 6px 8px;
+            }
+
+            .event-time-start {
+                font-size: 10px;
+            }
+
+            .event-title {
+                font-size: 11px;
+            }
+
+            .event-action {
+                width: 24px;
+                height: 24px;
+                font-size: 10px;
+            }
+
+            .primary-add-btn {
+                font-size: 10px;
+                padding: 6px 12px;
+            }
+
+            .outline-add-btn {
+                font-size: 10px;
+                padding: 6px 12px;
+            }
+
+            .icon-add-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .top-buttons {
+                gap: 5px;
+            }
+
+            .dev-toggle-btn,
+            .program-help-button {
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+
+            .auth-box h2 {
+                font-size: 21px;
+            }
+
+            .planner-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .stat-card {
+                padding: 8px 10px;
+            }
+
+            .stat-card strong {
+                font-size: 16px;
+            }
+
+            .stat-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+
+            .notes-container {
+                grid-template-columns: 1fr;
+            }
+
+            .term-overview {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .day-card {
+                min-width: 50px;
+                padding: 6px 4px;
+            }
+
+            .day-card strong {
+                font-size: 10px;
+            }
+
+            .section-header {
+                flex-wrap: wrap;
+            }
+
+            .creator-avatars-side {
+                gap: 15px;
+            }
+
+            .creator-avatar-circle {
+                width: 60px;
+                height: 60px;
+                padding: 3px;
+            }
+
+            .creator-avatar-circle .avatar-placeholder {
+                font-size: 20px;
+                border-width: 2px;
+            }
+
+            .avatar-label {
+                font-size: 9px;
+                padding: 2px 8px;
+            }
+
+            .event-card {
+                grid-template-columns: 40px 3px minmax(0, 1fr) auto;
+                gap: 5px;
+                padding: 5px 6px;
+            }
+
+            .event-time-start {
+                font-size: 9px;
+            }
+
+            .event-title {
+                font-size: 10px;
+            }
+
+            .event-action {
+                width: 22px;
+                height: 22px;
+                font-size: 9px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-cancel {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================================================
+         MAIN APP
+    ========================================================== -->
+
+    <main class="dashboard-card">
+
+        <section class="main-section">
+
+            <!-- =====================================================
+                 TOP BUTTONS
+            ====================================================== -->
+
+            <div class="top-buttons">
+
+                <button id="openSettings" class="dev-toggle-btn">
+                    <span data-i18n="settingsBtn">الإعدادات</span>
+                </button>
+
+                <button id="openCreator" class="dev-toggle-btn">
+                    👨‍💻
+                    <span data-i18n="creatorBtn">المطور</span>
+                </button>
+
+                <button id="openHelp" class="program-help-button">
+                    <span data-i18n="helpBtn">شرح البرنامج</span>
+                </button>
+
+            </div>
+
+            <!-- =====================================================
+                 REGISTER - مباشر بدون OTP ✅
+            ====================================================== -->
+
+            <div id="registerBox" class="auth-box hidden">
+                <div class="auth-icon">👤</div>
+                <h2 data-i18n="regTitle">إنشاء حساب جديد</h2>
+                <p class="auth-description">أنشئ حسابك وابدأ بتنظيم يومك.</p>
+
+                <input id="regName" type="text" autocomplete="given-name" data-i18n-ph="regNamePh" placeholder="الاسم الأول">
+                <input id="regLastName" type="text" autocomplete="family-name" data-i18n-ph="regLastNamePh" placeholder="اللقب / اسم العائلة">
+                <input id="regPhone" type="tel" autocomplete="tel" data-i18n-ph="regPhonePh" placeholder="رقم الهاتف">
+                <input id="regEmail" type="email" autocomplete="email" data-i18n-ph="regEmailPh" placeholder="البريد الإلكتروني">
+                <input id="regPassword" type="password" autocomplete="new-password" data-i18n-ph="regPasswordPh" placeholder="كلمة السر">
+
+                <button id="goToOtp" class="btn-primary" type="button" data-i18n="goToOtpBtn">إنشاء الحساب</button>
+
+                <p class="switch-text">
+                    <span data-i18n="alreadyHaveAccount">عندك حساب بالفعل؟</span>
+                    <a href="#" id="switchToLogin" data-i18n="loginLink">تسجيل الدخول</a>
+                </p>
+            </div>
+
+            <!-- =====================================================
+                 OTP - تم الحذف ✅
+            ====================================================== -->
+
+            <!-- =====================================================
+                 LOGIN
+            ====================================================== -->
+
+            <div id="loginBox" class="auth-box">
+                <div class="auth-icon">📅</div>
+                <span class="brand-mini">TABLE PLANNER</span>
+                <h2 data-i18n="loginTitle">تسجيل الدخول</h2>
+                <p class="auth-description">ادخل إلى مساحة تنظيم يومك.</p>
+
+                <input id="loginEmail" type="text" autocomplete="username" data-i18n-ph="loginEmailPh" placeholder="البريد الإلكتروني أو رقم الهاتف">
+                <input id="loginPassword" type="password" autocomplete="current-password" data-i18n-ph="loginPasswordPh" placeholder="كلمة السر">
+
+                <button id="loginBtn" class="btn-primary" type="button" data-i18n="loginBtn">دخول</button>
+
+                <p class="switch-text">
+                    <span data-i18n="noAccount">ليس لديك حساب؟</span>
+                    <a href="#" id="switchToRegister" data-i18n="registerLink">إنشاء حساب جديد</a>
+                </p>
+            </div>
+
+            <!-- =====================================================
+                 PLANNER APP
+            ====================================================== -->
+
+            <div id="profilePage" class="planner-page hidden">
+
+                <!-- =================================================
+                     APP HEADER
+                ================================================== -->
+
+                <header class="planner-header">
+
+                    <div class="planner-header-text">
+                        <span class="planner-eyebrow">YOUR PERSONAL PLANNER</span>
+                        <h1 id="welcomeUser">مرحباً بك</h1>
+                        <p>خطط ليومك، تابع دروسك وحقق أهدافك.</p>
+                    </div>
+
+                    <div class="header-actions">
+                        <button id="plannerTodayBtn" class="header-action-btn">📍 اليوم</button>
+                        <button id="logoutBtn" class="logout-button" data-i18n="logoutBtn">تسجيل الخروج</button>
+                    </div>
+
+                </header>
+
+                <!-- =================================================
+                     DATE BAR
+                ================================================== -->
+
+                <div class="date-bar">
+                    <div class="current-date">
+                        <span id="currentDateDay">السبت</span>
+                        <strong id="currentDateNumber">28</strong>
+                        <span id="currentDateMonth">أغسطس</span>
+                    </div>
+                    <div class="current-time">
+                        <span>الآن</span>
+                        <strong id="liveClock">00:00</strong>
+                    </div>
+                </div>
+
+                <!-- =================================================
+                     STATS
+                ================================================== -->
+
+                <section class="planner-stats">
+
+                    <article class="stat-card">
+                        <div class="stat-icon cyan">📚</div>
+                        <div>
+                            <span>دروس اليوم</span>
+                            <strong id="todayLessonsCount">0</strong>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-icon gold">🎯</div>
+                        <div>
+                            <span>أهداف اليوم</span>
+                            <strong id="todayGoalsCount">0</strong>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-icon green">✓</div>
+                        <div>
+                            <span>المكتمل</span>
+                            <strong id="completedGoalsCount">0</strong>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-icon pink">📝</div>
+                        <div>
+                            <span>الملاحظات</span>
+                            <strong id="notesCount">0</strong>
+                        </div>
+                    </article>
+
+                </section>
+
+                <!-- =================================================
+                     WEEK NAVIGATION
+                ================================================== -->
+
+                <section class="week-section">
+
+                    <div class="section-header">
+                        <div>
+                            <span class="section-eyebrow">WEEKLY PLANNER</span>
+                            <h2>أيام الأسبوع</h2>
+                        </div>
+                        <button id="addDayActivity" class="outline-add-btn">＋ نشاط</button>
+                    </div>
+
+                    <div id="daysContainer" class="days-container">
+                        <!-- سيتم إنشاء الأيام بواسطة JavaScript -->
+                    </div>
+
+                </section>
+
+                <!-- =================================================
+                     MAIN PLANNER GRID
+                ================================================== -->
+
+                <div class="planner-main-grid">
+
+                    <!-- =============================================
+                         DAILY TIMELINE
+                    ============================================== -->
+
+                    <section class="planner-panel timeline-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <span class="section-eyebrow">DAILY SCHEDULE</span>
+                                <h2 id="selectedDayTitle">خطة يوم السبت</h2>
+                            </div>
+                            <button id="addScheduleItem" class="icon-add-btn">＋</button>
+                        </div>
+
+                        <div id="dailyTimeline" class="daily-timeline">
+                            <!-- يتم إنشاء المحتوى بواسطة JavaScript -->
+                        </div>
+
+                    </section>
+
+                    <!-- =============================================
+                         GOALS
+                    ============================================== -->
+
+                    <section class="planner-panel goals-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <span class="section-eyebrow">DAILY GOALS</span>
+                                <h2>أهداف اليوم 🎯</h2>
+                            </div>
+                            <button id="addGoalBtn" class="icon-add-btn">＋</button>
+                        </div>
+
+                        <div id="goalsContainer" class="goals-container">
+                            <!-- يتم إنشاء المحتوى بواسطة JavaScript -->
+                        </div>
+
+                    </section>
+
+                </div>
+
+                <!-- =================================================
+                     LESSONS
+                ================================================== -->
+
+                <section class="planner-section">
+
+                    <div class="section-header">
+                        <div>
+                            <span class="section-eyebrow">TODAY'S LESSONS</span>
+                            <h2>دروس اليوم 📚</h2>
+                            <p>كل تفاصيل دروسك ومواعيدها وملاحظاتها.</p>
+                        </div>
+                        <button id="addLessonBtn" class="primary-add-btn">＋ إضافة درس</button>
+                    </div>
+
+                    <div id="lessonsContainer" class="lessons-container">
+                        <!-- يتم إنشاء المحتوى بواسطة JavaScript -->
+                    </div>
+
+                </section>
+
+                <!-- =================================================
+                     TERM LESSONS
+                ================================================== -->
+
+                <section class="planner-section term-planner-section">
+
+                    <div class="section-header">
+                        <div>
+                            <span class="section-eyebrow">TERM PLANNER</span>
+                            <h2>جدول دروس الترم 📖</h2>
+                            <p>احتفظ بكل دروس الترم في مكان واحد.</p>
+                        </div>
+                        <button id="addTermLessonBtn" class="primary-add-btn">＋ إضافة درس</button>
+                    </div>
+
+                    <div class="term-overview">
+                        <div class="term-overview-card">
+                            <span>إجمالي الدروس</span>
+                            <strong id="termLessonsCount">0</strong>
+                        </div>
+                        <div class="term-overview-card">
+                            <span>أيام الدراسة</span>
+                            <strong id="termStudyDays">0</strong>
+                        </div>
+                        <div class="term-overview-card">
+                            <span>إجمالي المصاريف</span>
+                            <strong id="termLessonsCost">0</strong>
+                        </div>
+                    </div>
+
+                    <div id="termLessonsContainer" class="term-lessons-container">
+                        <!-- يتم إنشاء المحتوى بواسطة JavaScript -->
+                    </div>
+
+                </section>
+
+                <!-- =================================================
+                     GENERAL NOTES
+                ================================================== -->
+
+                <section class="planner-section notes-section">
+
+                    <div class="section-header">
+                        <div>
+                            <span class="section-eyebrow">PERSONAL NOTES</span>
+                            <h2>الملاحظات العامة 📝</h2>
+                            <p>مساحة حرة لأي شيء تريد تدوينه.</p>
+                        </div>
+                        <button id="addNoteBtn" class="primary-add-btn">＋ ملاحظة</button>
+                    </div>
+
+                    <div id="notesContainer" class="notes-container">
+                        <!-- يتم إنشاء المحتوى بواسطة JavaScript -->
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         CREATOR MODAL - دايرتين جمب بعض
+         ═══════════════════════════════════════════════════════
+         🖼️ مكان الصورتين: حط الصور مكان الـ 👤 في كل دائرة
+         الصورة الأولى في avatar1 والثانية في avatar2
+    ========================================================== -->
+
+
+    <div id="creatorModal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <button id="closeCreator" class="close-btn">×</button>
+
+            <h2 data-i18n="aboutDev">حول المطور</h2>
+
+            <!-- ===============================================
+                 🖼️🖼️ دايرتين جمب بعض - حط الصور هنا 🖼️🖼️
+                 ============================================== -->
+
+            <div class="creator-avatars-side">
+
+                <!-- ═══════════════════════════════════════════════
+                     الصورة الأولى (يمين)
+                     ═══════════════════════════════════════════════ -->
+                <div class="creator-avatar-box">
+                    <div class="creator-avatar-circle">
+                        <div class="avatar-placeholder" id="avatar1">
+                             <img src="file.jpg" alt="karas zakaria">
+                          
+                        </div>
+                    </div>
+                    <span class="avatar-label">karas zakaria</span>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════
+                     الصورة الثانية (يسار)
+                     ═══════════════════════════════════════════════ -->
+                <div class="creator-avatar-box">
+                    <div class="creator-avatar-circle">
+                        <div class="avatar-placeholder" id="avatar2">
+                        
+                             <img src="mark.jpeg" alt="mark william">
+                            
+                        </div>
+                    </div>
+                    <span class="avatar-label">mark william</span>
+                </div>
+
+            </div>
+
+            <!-- ===============================================
+                 نهاية مكان الصورتين
+                 ============================================== -->
+
+            <div class="about-app" data-i18n="appDesc">
+                تم تطوير تطبيق Table Planner لتسهيل تنظيم وترتيب الجداول بأفضل تجربة مستخدم.
+            </div>
+
+            <!-- زر اليوتيوب - غير الرابط ده -->
+            <a href="https://youtube.com/@silv_66?si=0guq_DW-gq1p5kG8" target="_blank" class="yt-button" data-i18n="ytBtn">
+                📺 قناة اليوتيوب
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         SETTINGS MODAL
+    ========================================================== -->
+
+    <div id="settingsModal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <button id="closeSettings" class="close-btn">×</button>
+
+            <h2 data-i18n="settingsTitle">الإعدادات</h2>
+
+            <div class="settings-list">
+
+                <div class="setting-item">
+                    <span data-i18n="lightMode">الوضع الفاتح</span>
+                    <button id="toggleTheme" class="btn-setting" data-i18n="enableBtn">تفعيل</button>
+                </div>
+
+                <div class="setting-item">
+                    <span data-i18n="fontSize">حجم الخط</span>
+                    <select id="fontSizeSelect" class="select-setting">
+                        <option value="small" data-i18n="fontSmall">صغير</option>
+                        <option value="medium" selected data-i18n="fontMedium">متوسط</option>
+                        <option value="large" data-i18n="fontLarge">كبير</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <span data-i18n="langLabel">اللغة 🌐</span>
+                    <select id="languageSelect" class="language-select">
+                        <option value="ar">العربية</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <span data-i18n="cacheLabel">التخزين المؤقت</span>
+                    <button id="clearCacheBtn" class="btn-danger" data-i18n="clearCacheBtn">مسح الكاش</button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         HELP MODAL
+    ========================================================== -->
+
+    <div id="helpModal" class="modal hidden">
+
+        <div class="modal-content help-modal-content">
+
+            <button id="closeHelp" class="close-btn">×</button>
+
+            <h3 data-i18n="helpTitle">شرح البرنامج 📖</h3>
+
+            <div class="program-help-content">
+
+                <div class="program-help-item">
+                    <strong>👤 إنشاء الحساب</strong>
+                    <span>أنشئ حسابك باستخدام بياناتك الأساسية.</span>
+                </div>
+
+                <div class="program-help-item">
+                    <strong>📅 جدول الأسبوع</strong>
+                    <span>اختر أي يوم وشاهد كل ما لديك من مواعيد وأنشطة.</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         MODALS الإضافية (للإضافة والتعديل)
+    ========================================================== -->
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal hidden planner-modal">
+        <div class="modal-content">
+            <button class="close-btn" data-close-planner-modal>×</button>
+            <h2 id="taskModalTitle">إضافة نشاط جديد</h2>
+            <div class="event-form">
+                <input id="taskName" type="text" placeholder="اسم النشاط">
+                <select id="taskType">
+                    <option value="wakeup">🌅 استيقاظ</option>
+                    <option value="sleep">🌙 نوم</option>
+                    <option value="school">🏫 مدرسة</option>
+                    <option value="work">💼 شغل</option>
+                    <option value="study">📚 مذاكرة</option>
+                    <option value="lesson">🎓 درس</option>
+                    <option value="food">🍽️ وجبة</option>
+                    <option value="task">✅ مهمة</option>
+                    <option value="other">📌 أخرى</option>
+                </select>
+                <input id="taskStartTime" type="time" placeholder="وقت البداية">
+                <input id="taskEndTime" type="time" placeholder="وقت النهاية">
+                <input id="taskLocation" type="text" placeholder="المكان">
+                <input id="taskPrice" type="text" placeholder="السعر">
+                <textarea id="taskNotes" placeholder="ملاحظات"></textarea>
+                <div class="form-actions">
+                    <button id="saveTaskBtn" class="form-submit">حفظ</button>
+                    <button class="form-cancel" data-close-planner-modal>إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Modal -->
+    <div id="goalModal" class="modal hidden planner-modal">
+        <div class="modal-content">
+            <button class="close-btn" data-close-planner-modal>×</button>
+            <h2>إضافة هدف جديد</h2>
+            <input id="goalInput" type="text" placeholder="اكتب هدفك هنا...">
+            <div class="form-actions">
+                <button id="saveGoalBtn" class="form-submit">حفظ</button>
+                <button class="form-cancel" data-close-planner-modal>إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesson Modal -->
+    <div id="lessonModal" class="modal hidden planner-modal">
+        <div class="modal-content">
+            <button class="close-btn" data-close-planner-modal>×</button>
+            <h2>إضافة درس جديد</h2>
+            <div class="event-form">
+                <input id="lessonName" type="text" placeholder="اسم الدرس">
+                <input id="lessonTeacher" type="text" placeholder="المدرس">
+                <input id="lessonDate" type="date" placeholder="التاريخ">
+                <input id="lessonNumber" type="text" placeholder="رقم الدرس">
+                <input id="lessonTerm" type="text" placeholder="الترم">
+                <input id="lessonLocation" type="text" placeholder="المكان">
+                <input id="lessonPrice" type="text" placeholder="السعر">
+                <textarea id="lessonNotes" placeholder="ملاحظات الدرس"></textarea>
+                <div class="form-actions">
+                    <button id="saveLessonBtn" class="form-submit">حفظ</button>
+                    <button class="form-cancel" data-close-planner-modal>إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="noteModal" class="modal hidden planner-modal">
+        <div class="modal-content">
+            <button class="close-btn" data-close-planner-modal>×</button>
+            <h2>إضافة ملاحظة جديدة</h2>
+            <div class="event-form">
+                <input id="noteTitle" type="text" placeholder="عنوان الملاحظة">
+                <textarea id="noteContent" placeholder="اكتب ملاحظتك هنا..."></textarea>
+                <div class="form-actions">
+                    <button id="saveNoteBtn" class="form-submit">حفظ</button>
+                    <button class="form-cancel" data-close-planner-modal>إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         JAVASCRIPT - مع حذف OTP ✅
+    ========================================================== -->
+
+    <script>
+        // =========================================================
+        // إعدادات
+        // =========================================================
+
+        // ⚠️ غير الرابط ده بقناة اليوتيوب بتاعتك
+        const YOUTUBE_CHANNEL_URL = "https://youtube.com/@silv_66?si=0guq_DW-gq1p5kG8";
+
+        // =========================================================
+        // الترجمة
+        // =========================================================
+
+        const translations = {
+
+            ar: {
+                settingsBtn: "الإعدادات ⚙️",
+                creatorBtn: "المطور",
+                helpBtn: "شرح البرنامج 📖",
+
+                regTitle: "إنشاء حساب جديد",
+                regNamePh: "الاسم الأول",
+                regLastNamePh: "اللقب / اسم العائلة",
+                regPhonePh: "رقم الهاتف",
+                regEmailPh: "البريد الإلكتروني",
+                regPasswordPh: "كلمة السر",
+
+                goToOtpBtn: "إنشاء الحساب",
+                alreadyHaveAccount: "عندك حساب بالفعل؟",
+                loginLink: "تسجيل الدخول",
+
+                loginTitle: "تسجيل الدخول",
+                loginEmailPh: "البريد الإلكتروني أو رقم الهاتف",
+                loginPasswordPh: "كلمة السر",
+                loginBtn: "دخول",
+
+                noAccount: "ليس لديك حساب؟",
+                registerLink: "إنشاء حساب جديد",
+
+                welcome: "مرحباً بك",
+                loginSuccess: "تم تسجيل الدخول بنجاح 🎉",
+                logoutBtn: "تسجيل الخروج",
+
+                aboutDev: "حول المطور",
+                appDesc: "تم تطوير تطبيق Table Planner لتسهيل تنظيم وترتيب الجداول بأفضل تجربة مستخدم.",
+                ytBtn: "📺 قناة اليوتيوب",
+
+                settingsTitle: "الإعدادات",
+                lightMode: "الوضع الفاتح",
+                enableBtn: "تفعيل",
+                disableBtn: "إلغاء التفعيل",
+
+                fontSize: "حجم الخط",
+                fontSmall: "صغير",
+                fontMedium: "متوسط",
+                fontLarge: "كبير",
+
+                langLabel: "اللغة 🌐",
+
+                cacheLabel: "التخزين المؤقت",
+                clearCacheBtn: "مسح الكاش",
+
+                helpTitle: "شرح البرنامج 📖",
+
+                fillAlert: "من فضلك املأ جميع البيانات أولاً.",
+                wrongLogin: "البريد الإلكتروني أو كلمة السر غير صحيحة!",
+                cacheCleared: "تم مسح البيانات بنجاح!",
+
+                saturday: "السبت",
+                sunday: "الأحد",
+                monday: "الإثنين",
+                tuesday: "الثلاثاء",
+                wednesday: "الأربعاء",
+                thursday: "الخميس",
+                friday: "الجمعة",
+
+                addTask: "إضافة نشاط",
+                addLesson: "إضافة درس",
+                addGoal: "إضافة هدف",
+                addNote: "إضافة ملاحظة",
+
+                totalToday: "إجمالي الأنشطة",
+                completedToday: "تم إنجازه",
+                goalsCount: "الأهداف",
+                lessonsCount: "الدروس",
+
+                noTasks: "لا توجد أنشطة لهذا اليوم.",
+                noGoals: "لا توجد أهداف لهذا اليوم.",
+                noLessons: "لا توجد دروس مضافة حتى الآن.",
+                noNotes: "لا توجد ملاحظات.",
+
+                edit: "تعديل",
+                delete: "حذف",
+                completed: "تم الإنجاز",
+                notCompleted: "لم يتم",
+                confirmDelete: "هل أنت متأكد من حذف هذا العنصر؟",
+
+                addTaskTitle: "إضافة نشاط جديد",
+                generalNotes: "ملاحظات"
+            },
+
+
+            en: {
+                settingsBtn: "Settings ⚙️",
+                creatorBtn: "Creator",
+                helpBtn: "Help 📖",
+
+                regTitle: "Create Account",
+                regNamePh: "First Name",
+                regLastNamePh: "Last Name",
+                regPhonePh: "Phone Number",
+                regEmailPh: "Email Address",
+                regPasswordPh: "Password",
+
+                goToOtpBtn: "Create Account",
+                alreadyHaveAccount: "Already have an account?",
+                loginLink: "Login",
+
+                loginTitle: "Login",
+                loginEmailPh: "Email or Phone",
+                loginPasswordPh: "Password",
+                loginBtn: "Login",
+
+                noAccount: "Don't have an account?",
+                registerLink: "Create Account",
+
+                welcome: "Welcome",
+                loginSuccess: "Logged in successfully 🎉",
+                logoutBtn: "Logout",
+
+                aboutDev: "About Developer",
+                appDesc: "Table Planner was developed to easily organize and schedule tasks with the best user experience.",
+                ytBtn: "📺 YouTube Channel",
+
+                settingsTitle: "Settings",
+                lightMode: "Light Mode",
+                enableBtn: "Enable",
+                disableBtn: "Disable",
+
+                fontSize: "Font Size",
+                fontSmall: "Small",
+                fontMedium: "Medium",
+                fontLarge: "Large",
+
+                langLabel: "Language 🌐",
+
+                cacheLabel: "Cache Storage",
+                clearCacheBtn: "Clear Cache",
+
+                helpTitle: "Program Guide 📖",
+
+                fillAlert: "Please fill in all fields first.",
+                wrongLogin: "Invalid email or password!",
+                cacheCleared: "Data cleared successfully!",
+
+                saturday: "Saturday",
+                sunday: "Sunday",
+                monday: "Monday",
+                tuesday: "Tuesday",
+                wednesday: "Wednesday",
+                thursday: "Thursday",
+                friday: "Friday",
+
+                addTask: "Add Activity",
+                addLesson: "Add Lesson",
+                addGoal: "Add Goal",
+                addNote: "Add Note",
+
+                totalToday: "Total Activities",
+                completedToday: "Completed",
+                goalsCount: "Goals",
+                lessonsCount: "Lessons",
+
+                noTasks: "No activities for this day.",
+                noGoals: "No goals for this day.",
+                noLessons: "No lessons added yet.",
+                noNotes: "No notes.",
+
+                edit: "Edit",
+                delete: "Delete",
+                completed: "Completed",
+                notCompleted: "Not Completed",
+                confirmDelete: "Are you sure you want to delete this item?",
+
+                addTaskTitle: "Add New Activity",
+                generalNotes: "Notes"
+            }
+        };
+
+
+        let currentLang = "ar";
+        let tempUserData = {};
+
+
+        // =========================================================
+        // العناصر الأساسية
+        // =========================================================
+
+        const registerBox = document.getElementById("registerBox");
+        const loginBox = document.getElementById("loginBox");
+        const profilePage = document.getElementById("profilePage");
+
+        const goToOtp = document.getElementById("goToOtp");
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+
+        const switchToLogin = document.getElementById("switchToLogin");
+        const switchToRegister = document.getElementById("switchToRegister");
+
+        const toggleTheme = document.getElementById("toggleTheme");
+        const fontSizeSelect = document.getElementById("fontSizeSelect");
+        const languageSelect = document.getElementById("languageSelect");
+        const clearCacheBtn = document.getElementById("clearCacheBtn");
+
+        const openCreator = document.getElementById("openCreator");
+        const closeCreator = document.getElementById("closeCreator");
+        const creatorModal = document.getElementById("creatorModal");
+
+        const openSettings = document.getElementById("openSettings");
+        const closeSettings = document.getElementById("closeSettings");
+        const settingsModal = document.getElementById("settingsModal");
+
+        const openHelp = document.getElementById("openHelp");
+        const closeHelp = document.getElementById("closeHelp");
+        const helpModal = document.getElementById("helpModal");
+
+        // =========================================================
+        // تحديث رابط اليوتيوب
+        // =========================================================
+
+        document.querySelectorAll(".yt-button").forEach(function(btn) {
+            btn.href = YOUTUBE_CHANNEL_URL;
+        });
+
+
+        // =========================================================
+        // تغيير اللغة
+        // =========================================================
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === "en" ? "ltr" : "rtl";
+
+            document.querySelectorAll("[data-i18n]").forEach(function(el) {
+                const key = el.getAttribute("data-i18n");
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll("[data-i18n-ph]").forEach(function(el) {
+                const key = el.getAttribute("data-i18n-ph");
+                if (translations[lang] && translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+
+            const isLight = document.body.classList.contains("light-mode");
+            if (toggleTheme) {
+                toggleTheme.textContent = isLight ? translations[lang].disableBtn : translations[lang].enableBtn;
+            }
+
+            if (typeof renderPlanner === "function") {
+                renderPlanner();
+            }
+        }
+
+
+        // =========================================================
+        // إغلاق النوافذ
+        // =========================================================
+
+        function closeAllModals() {
+            if (creatorModal) creatorModal.classList.add("hidden");
+            if (settingsModal) settingsModal.classList.add("hidden");
+            if (helpModal) helpModal.classList.add("hidden");
+            closePlannerModals();
+        }
+
+        if (openCreator) {
+            openCreator.addEventListener("click", function() {
+                creatorModal.classList.remove("hidden");
+            });
+        }
+
+        if (closeCreator) {
+            closeCreator.addEventListener("click", function() {
+                creatorModal.classList.add("hidden");
+            });
+        }
+
+        if (openSettings) {
+            openSettings.addEventListener("click", function() {
+                settingsModal.classList.remove("hidden");
+            });
+        }
+
+        if (closeSettings) {
+            closeSettings.addEventListener("click", function() {
+                settingsModal.classList.add("hidden");
+            });
+        }
+
+        if (openHelp) {
+            openHelp.addEventListener("click", function() {
+                helpModal.classList.remove("hidden");
+            });
+        }
+
+        if (closeHelp) {
+            closeHelp.addEventListener("click", function() {
+                helpModal.classList.add("hidden");
+            });
+        }
+
+        window.addEventListener("click", function(event) {
+            if (event.target.classList.contains("modal")) {
+                event.target.classList.add("hidden");
+            }
+        });
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") {
+                closeAllModals();
+            }
+        });
+
+
+        // =========================================================
+        // الوضع الفاتح / حجم الخط / اللغة
+        // =========================================================
+
+        if (toggleTheme) {
+            toggleTheme.addEventListener("click", function() {
+                document.body.classList.toggle("light-mode");
+                const isLight = document.body.classList.contains("light-mode");
+                toggleTheme.textContent = isLight ? translations[currentLang].disableBtn : translations[currentLang]
+                    .enableBtn;
+            });
+        }
+
+        if (fontSizeSelect) {
+            fontSizeSelect.addEventListener("change", function(event) {
+                document.body.classList.remove("font-small", "font-medium", "font-large");
+                document.body.classList.add("font-" + event.target.value);
+            });
+        }
+
+        if (languageSelect) {
+            languageSelect.addEventListener("change", function(event) {
+                changeLanguage(event.target.value);
+            });
+        }
+
+        if (clearCacheBtn) {
+            clearCacheBtn.addEventListener("click", function() {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert(translations[currentLang].cacheCleared);
+                location.reload();
+            });
+        }
+
+
+        // =========================================================
+        // Auth - بدون OTP ✅
+        // =========================================================
+
+        if (switchToLogin) {
+            switchToLogin.addEventListener("click", function(e) {
+                e.preventDefault();
+                if (registerBox) registerBox.classList.add("hidden");
+                if (profilePage) profilePage.classList.add("hidden");
+                if (loginBox) loginBox.classList.remove("hidden");
+            });
+        }
+
+        if (switchToRegister) {
+            switchToRegister.addEventListener("click", function(e) {
+                e.preventDefault();
+                if (loginBox) loginBox.classList.add("hidden");
+                if (profilePage) profilePage.classList.add("hidden");
+                if (registerBox) registerBox.classList.remove("hidden");
+            });
+        }
+
+        // ✅ التسجيل مباشر بدون OTP
+        if (goToOtp) {
+            goToOtp.addEventListener("click", function() {
+                const name = document.getElementById("regName").value.trim();
+                const lastName = document.getElementById("regLastName").value.trim();
+                const phone = document.getElementById("regPhone").value.trim();
+                const email = document.getElementById("regEmail").value.trim();
+                const password = document.getElementById("regPassword").value;
+
+                if (!name || !lastName || !phone || !email || !password) {
+                    alert(translations[currentLang].fillAlert);
+                    return;
+                }
+
+                tempUserData = { name, lastName, phone, email, password };
+
+                // حفظ البيانات مباشرة
+                localStorage.setItem("userAccount", JSON.stringify(tempUserData));
+
+                // فتح الصفحة الرئيسية مباشرة
+                openProfile(name + " " + lastName);
+            });
+        }
+
+        if (loginBtn) {
+            loginBtn.addEventListener("click", function() {
+                const email = document.getElementById("loginEmail").value.trim();
+                const password = document.getElementById("loginPassword").value;
+
+                const savedUser = JSON.parse(localStorage.getItem("userAccount"));
+
+                if (savedUser && (savedUser.email === email || savedUser.phone === email) && savedUser.password ===
+                    password) {
+                    openProfile(savedUser.name + " " + savedUser.lastName);
+                } else {
+                    alert(translations[currentLang].wrongLogin);
+                }
+            });
+        }
+
+
+        function openProfile(fullName) {
+            if (registerBox) registerBox.classList.add("hidden");
+            if (loginBox) loginBox.classList.add("hidden");
+            if (profilePage) profilePage.classList.remove("hidden");
+
+            const prefix = currentLang === "ar" ? "مرحباً بك، " : "Welcome, ";
+            const welcomeUser = document.getElementById("welcomeUser");
+            if (welcomeUser) {
+                welcomeUser.textContent = prefix + fullName;
+            }
+
+            initializePlanner();
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function() {
+                if (profilePage) profilePage.classList.add("hidden");
+                if (loginBox) loginBox.classList.remove("hidden");
+            });
+        }
+
+
+        // =========================================================
+        // PLANNER SYSTEM
+        // =========================================================
+
+        const plannerStorageKey = "tablePlannerData";
+
+        let plannerData = loadPlannerData();
+        let selectedDay = localStorage.getItem("selectedPlannerDay") || getCurrentDay();
+        let editingId = null;
+        let plannerInitialized = false;
+
+        const days = [
+            { id: "saturday", key: "saturday" },
+            { id: "sunday", key: "sunday" },
+            { id: "monday", key: "monday" },
+            { id: "tuesday", key: "tuesday" },
+            { id: "wednesday", key: "wednesday" },
+            { id: "thursday", key: "thursday" },
+            { id: "friday", key: "friday" }
+        ];
+
+
+        function loadPlannerData() {
+            try {
+                const saved = localStorage.getItem(plannerStorageKey);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    return {
+                        schedule: parsed.schedule || {},
+                        goals: parsed.goals || {},
+                        lessons: parsed.lessons || [],
+                        notes: parsed.notes || []
+                    };
+                }
+            } catch (error) {
+                console.error("Planner data error:", error);
+            }
+            return { schedule: {}, goals: {}, lessons: [], notes: [] };
+        }
+
+
+        function savePlannerData() {
+            localStorage.setItem(plannerStorageKey, JSON.stringify(plannerData));
+        }
+
+
+        function createId(prefix) {
+            return prefix + "_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+        }
+
+
+        function getCurrentDay() {
+            const day = new Date().getDay();
+            const map = { 0: "sunday", 1: "monday", 2: "tuesday", 3: "wednesday", 4: "thursday", 5: "friday", 6: "saturday" };
+            return map[day];
+        }
+
+
+        function getDaySchedule(day) {
+            if (!plannerData.schedule[day]) {
+                plannerData.schedule[day] = [];
+            }
+            return plannerData.schedule[day];
+        }
+
+
+        function getDayGoals(day) {
+            if (!plannerData.goals[day]) {
+                plannerData.goals[day] = [];
+            }
+            return plannerData.goals[day];
+        }
+
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return "";
+            return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        function getTypeIcon(type) {
+            const icons = {
+                wakeup: "🌅",
+                sleep: "🌙",
+                school: "🏫",
+                work: "💼",
+                study: "📚",
+                lesson: "🎓",
+                food: "🍽️",
+                task: "✅",
+                other: "📌"
+            };
+            return icons[type] || "📌";
+        }
+
+
+        function getDayIcon(day) {
+            const icons = {
+                saturday: "☀️",
+                sunday: "🌤️",
+                monday: "📘",
+                tuesday: "🎯",
+                wednesday: "⚡",
+                thursday: "🔥",
+                friday: "🌙"
+            };
+            return icons[day] || "📅";
+        }
+
+
+        // =========================================================
+        // إنشاء أيام الأسبوع
+        // =========================================================
+
+        function renderDays() {
+            const container = document.getElementById("daysContainer");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            days.forEach(function(day) {
+                const button = document.createElement("button");
+                button.className = "day-card" + (day.id === selectedDay ? " active" : "");
+                button.dataset.day = day.id;
+
+                const schedule = getDaySchedule(day.id);
+
+                button.innerHTML = `
+                        <span class="day-number">${String(schedule.length).padStart(2, '0')}</span>
+                        <strong>${translations[currentLang][day.key]}</strong>
+                        <small>${day.id}</small>
+                    `;
+
+                button.addEventListener("click", function() {
+                    selectedDay = day.id;
+                    localStorage.setItem("selectedPlannerDay", selectedDay);
+                    renderPlanner();
+                });
+
+                container.appendChild(button);
+            });
+        }
+
+
+        // =========================================================
+        // عرض المحتوى
+        // =========================================================
+
+        function renderCurrentDayTitle() {
+            const title = document.getElementById("selectedDayTitle");
+            if (!title) return;
+            const day = days.find(function(d) { return d.id === selectedDay; });
+            if (day) {
+                title.textContent = "خطة يوم " + translations[currentLang][day.key];
+            }
+        }
+
+
+        function renderSchedule() {
+            const container = document.getElementById("dailyTimeline");
+            if (!container) return;
+
+            const items = getDaySchedule(selectedDay);
+            const sorted = items.slice().sort(function(a, b) {
+                return (a.startTime || "").localeCompare(b.startTime || "");
+            });
+
+            container.innerHTML = "";
+
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">☀️</div>
+                            <h3>يومك يبدأ من هنا</h3>
+                            <p>أضف أول موعد أو نشاط ليومك.</p>
+                            <button id="emptyAddActivity" class="empty-action-btn">＋ إضافة أول نشاط</button>
+                        </div>
+                    `;
+                const emptyBtn = document.getElementById("emptyAddActivity");
+                if (emptyBtn) {
+                    emptyBtn.addEventListener("click", function() {
+                        openTaskModal();
+                    });
+                }
+                return;
+            }
+
+            sorted.forEach(function(item) {
+                const card = document.createElement("div");
+                card.className = "event-card" + (item.completed ? " completed" : "");
+
+                const typeIcon = getTypeIcon(item.type);
+
+                card.innerHTML = `
+                        <div class="event-time">
+                            <span class="event-time-start">${item.startTime || "--:--"}</span>
+                            ${item.endTime ? `<span class="event-time-end">${item.endTime}</span>` : ""}
+                        </div>
+                        <div class="event-color"></div>
+                        <div class="event-info">
+                            <div class="event-title">${typeIcon} ${escapeHtml(item.name)}</div>
+                            ${item.location ? `<div class="event-description">📍 ${escapeHtml(item.location)}</div>` : ""}
+                            ${item.notes ? `<div class="event-description">${escapeHtml(item.notes)}</div>` : ""}
+                            ${item.price ? `<div class="event-tag">💰 ${escapeHtml(item.price)}</div>` : ""}
+                        </div>
+                        <div class="event-actions">
+                            <button class="event-action complete-btn" title="${item.completed ? translations[currentLang].notCompleted : translations[currentLang].completed}">${item.completed ? "↩️" : "✓"}</button>
+                            <button class="event-action edit-btn" title="${translations[currentLang].edit}">✏️</button>
+                            <button class="event-action delete-btn" title="${translations[currentLang].delete}">🗑️</button>
+                        </div>
+                    `;
+
+                card.querySelector(".complete-btn").addEventListener("click", function() {
+                    item.completed = !item.completed;
+                    savePlannerData();
+                    renderPlanner();
+                });
+
+                card.querySelector(".edit-btn").addEventListener("click", function() {
+                    openTaskModal(item);
+                });
+
+                card.querySelector(".delete-btn").addEventListener("click", function() {
+                    if (confirm(translations[currentLang].confirmDelete)) {
+                        const list = getDaySchedule(selectedDay);
+                        plannerData.schedule[selectedDay] = list.filter(function(t) { return t.id !== item.id; });
+                        savePlannerData();
+                        renderPlanner();
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+
+        function renderGoals() {
+            const container = document.getElementById("goalsContainer");
+            if (!container) return;
+
+            const goals = getDayGoals(selectedDay);
+
+            container.innerHTML = "";
+
+            if (goals.length === 0) {
+                container.innerHTML = `
+                        <div class="empty-state compact">
+                            <div class="empty-state-icon">🎯</div>
+                            <p>أضف أهدافك لهذا اليوم.</p>
+                        </div>
+                    `;
+                return;
+            }
+
+            goals.forEach(function(goal) {
+                const item = document.createElement("div");
+                item.className = "goal-item" + (goal.completed ? " completed" : "");
+
+                item.innerHTML = `
+                        <button class="goal-check">${goal.completed ? "✓" : ""}</button>
+                        <span class="goal-text">${escapeHtml(goal.text)}</span>
+                        <button class="goal-edit">✏️</button>
+                        <button class="goal-delete">🗑️</button>
+                    `;
+
+                item.querySelector(".goal-check").addEventListener("click", function() {
+                    goal.completed = !goal.completed;
+                    savePlannerData();
+                    renderPlanner();
+                });
+
+                item.querySelector(".goal-edit").addEventListener("click", function() {
+                    openGoalModal(goal);
+                });
+
+                item.querySelector(".goal-delete").addEventListener("click", function() {
+                    if (confirm(translations[currentLang].confirmDelete)) {
+                        plannerData.goals[selectedDay] = goals.filter(function(g) { return g.id !== goal.id; });
+                        savePlannerData();
+                        renderPlanner();
+                    }
+                });
+
+                container.appendChild(item);
+            });
+        }
+
+
+        function renderLessons() {
+            const container = document.getElementById("lessonsContainer");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            if (plannerData.lessons.length === 0) {
+                container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📚</div>
+                            <h3>لا توجد دروس اليوم</h3>
+                            <p>أضف درسًا جديدًا وسيظهر هنا بكل تفاصيله.</p>
+                        </div>
+                    `;
+                return;
+            }
+
+            const todayLessons = plannerData.lessons;
+
+            todayLessons.forEach(function(lesson) {
+                const card = document.createElement("div");
+                card.className = "lesson-card" + (lesson.completed ? " completed" : "");
+
+                card.innerHTML = `
+                        <div class="lesson-number">${lesson.number || "—"}</div>
+                        <div class="lesson-main">
+                            <h4>${escapeHtml(lesson.name)}</h4>
+                            <div class="lesson-meta">
+                                ${lesson.teacher ? `<span>👨‍🏫 ${escapeHtml(lesson.teacher)}</span>` : ""}
+                                ${lesson.location ? `<span>📍 ${escapeHtml(lesson.location)}</span>` : ""}
+                                ${lesson.price ? `<span>💰 ${escapeHtml(lesson.price)}</span>` : ""}
+                            </div>
+                            ${lesson.notes ? `<p>${escapeHtml(lesson.notes)}</p>` : ""}
+                        </div>
+                        <div class="lesson-actions">
+                            <button class="lesson-complete">${lesson.completed ? "↩️" : "✓"}</button>
+                            <button class="lesson-edit">✏️</button>
+                            <button class="lesson-delete">🗑️</button>
+                        </div>
+                    `;
+
+                card.querySelector(".lesson-complete").addEventListener("click", function() {
+                    lesson.completed = !lesson.completed;
+                    savePlannerData();
+                    renderPlanner();
+                });
+
+                card.querySelector(".lesson-edit").addEventListener("click", function() {
+                    openLessonModal(lesson);
+                });
+
+                card.querySelector(".lesson-delete").addEventListener("click", function() {
+                    if (confirm(translations[currentLang].confirmDelete)) {
+                        plannerData.lessons = plannerData.lessons.filter(function(l) { return l.id !== lesson
+                            .id; });
+                        savePlannerData();
+                        renderPlanner();
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+
+        function renderNotes() {
+            const container = document.getElementById("notesContainer");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            if (plannerData.notes.length === 0) {
+                container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <h3>لا توجد ملاحظات</h3>
+                            <p>اكتب أفكارك أو الأشياء المهمة التي تريد تذكرها.</p>
+                        </div>
+                    `;
+                return;
+            }
+
+            plannerData.notes.forEach(function(note) {
+                const card = document.createElement("div");
+                card.className = "note-card";
+
+                card.innerHTML = `
+                        <div class="note-pin">📌</div>
+                        <div class="note-content">
+                            <h4>${escapeHtml(note.title || translations[currentLang].generalNotes)}</h4>
+                            <p>${escapeHtml(note.content)}</p>
+                        </div>
+                        <div class="note-actions">
+                            <button class="note-edit">✏️</button>
+                            <button class="note-delete">🗑️</button>
+                        </div>
+                    `;
+
+                card.querySelector(".note-edit").addEventListener("click", function() {
+                    openNoteModal(note);
+                });
+
+                card.querySelector(".note-delete").addEventListener("click", function() {
+                    if (confirm(translations[currentLang].confirmDelete)) {
+                        plannerData.notes = plannerData.notes.filter(function(n) { return n.id !== note.id; });
+                        savePlannerData();
+                        renderPlanner();
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+
+        function renderStatistics() {
+            const schedule = getDaySchedule(selectedDay);
+            const goals = getDayGoals(selectedDay);
+
+            const completedTasks = schedule.filter(function(t) { return t.completed; }).length;
+
+            document.getElementById("todayLessonsCount").textContent = schedule.length;
+            document.getElementById("todayGoalsCount").textContent = goals.length;
+            document.getElementById("completedGoalsCount").textContent = completedTasks;
+            document.getElementById("notesCount").textContent = plannerData.notes.length;
+
+            document.getElementById("termLessonsCount").textContent = plannerData.lessons.length;
+            const totalCost = plannerData.lessons.reduce(function(sum, l) {
+                return sum + (parseFloat(l.price) || 0);
+            }, 0);
+            document.getElementById("termLessonsCost").textContent = totalCost + " ج.م";
+            document.getElementById("termStudyDays").textContent = plannerData.lessons.length;
+        }
+
+
+        // =========================================================
+        // Render Planner
+        // =========================================================
+
+        function renderPlanner() {
+            if (!plannerInitialized) return;
+
+            renderDays();
+            renderCurrentDayTitle();
+            renderSchedule();
+            renderGoals();
+            renderLessons();
+            renderNotes();
+            renderStatistics();
+            updateClock();
+        }
+
+
+        // =========================================================
+        // الساعة
+        // =========================================================
+
+        function updateClock() {
+            const clock = document.getElementById("liveClock");
+            if (!clock) return;
+
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, "0");
+            const minutes = String(now.getMinutes()).padStart(2, "0");
+            clock.textContent = hours + ":" + minutes;
+
+            const dateDay = document.getElementById("currentDateDay");
+            const dateNumber = document.getElementById("currentDateNumber");
+            const dateMonth = document.getElementById("currentDateMonth");
+
+            if (dateDay) {
+                const daysAr = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+                dateDay.textContent = daysAr[now.getDay()];
+            }
+            if (dateNumber) {
+                dateNumber.textContent = String(now.getDate()).padStart(2, "0");
+            }
+            if (dateMonth) {
+                const monthsAr = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر",
+                    "نوفمبر", "ديسمبر"
+                ];
+                dateMonth.textContent = monthsAr[now.getMonth()];
+            }
+        }
+
+
+        // =========================================================
+        // MODALS
+        // =========================================================
+
+        function openTaskModal(task) {
+            const modal = document.getElementById("taskModal");
+            if (!modal) return;
+
+            editingId = task ? task.id : null;
+
+            document.getElementById("taskModalTitle").textContent = task ? translations[currentLang].edit :
+                translations[currentLang].addTaskTitle;
+
+            document.getElementById("taskName").value = task ? task.name : "";
+            document.getElementById("taskType").value = task ? task.type : "task";
+            document.getElementById("taskStartTime").value = task ? task.startTime : "";
+            document.getElementById("taskEndTime").value = task ? task.endTime : "";
+            document.getElementById("taskLocation").value = task ? task.location : "";
+            document.getElementById("taskPrice").value = task ? task.price : "";
+            document.getElementById("taskNotes").value = task ? task.notes : "";
+
+            modal.classList.remove("hidden");
+        }
+
+
+        function openGoalModal(goal) {
+            const modal = document.getElementById("goalModal");
+            if (!modal) return;
+
+            editingId = goal ? goal.id : null;
+            document.getElementById("goalInput").value = goal ? goal.text : "";
+            modal.classList.remove("hidden");
+        }
+
+
+        function openLessonModal(lesson) {
+            const modal = document.getElementById("lessonModal");
+            if (!modal) return;
+
+            editingId = lesson ? lesson.id : null;
+            document.getElementById("lessonName").value = lesson ? lesson.name : "";
+            document.getElementById("lessonTeacher").value = lesson ? lesson.teacher : "";
+            document.getElementById("lessonDate").value = lesson ? lesson.date : "";
+            document.getElementById("lessonNumber").value = lesson ? lesson.number : "";
+            document.getElementById("lessonTerm").value = lesson ? lesson.term : "";
+            document.getElementById("lessonLocation").value = lesson ? lesson.location : "";
+            document.getElementById("lessonPrice").value = lesson ? lesson.price : "";
+            document.getElementById("lessonNotes").value = lesson ? lesson.notes : "";
+
+            modal.classList.remove("hidden");
+        }
+
+
+        function openNoteModal(note) {
+            const modal = document.getElementById("noteModal");
+            if (!modal) return;
+
+            editingId = note ? note.id : null;
+            document.getElementById("noteTitle").value = note ? note.title : "";
+            document.getElementById("noteContent").value = note ? note.content : "";
+
+            modal.classList.remove("hidden");
+        }
+
+
+        function closePlannerModals() {
+            document.querySelectorAll(".planner-modal").forEach(function(modal) {
+                modal.classList.add("hidden");
+            });
+            editingId = null;
+        }
+
+
+        // =========================================================
+        // حفظ البيانات
+        // =========================================================
+
+        function saveTask() {
+            const name = document.getElementById("taskName").value.trim();
+            if (!name) {
+                alert(translations[currentLang].fillAlert);
+                return;
+            }
+
+            const task = {
+                id: editingId || createId("task"),
+                name: name,
+                type: document.getElementById("taskType").value || "task",
+                startTime: document.getElementById("taskStartTime").value,
+                endTime: document.getElementById("taskEndTime").value,
+                location: document.getElementById("taskLocation").value,
+                price: document.getElementById("taskPrice").value,
+                notes: document.getElementById("taskNotes").value,
+                completed: false
+            };
+
+            const list = getDaySchedule(selectedDay);
+
+            if (editingId) {
+                const index = list.findIndex(function(t) { return t.id === editingId; });
+                if (index !== -1) {
+                    task.completed = list[index].completed;
+                    list[index] = task;
+                }
+            } else {
+                list.push(task);
+            }
+
+            plannerData.schedule[selectedDay] = list;
+            savePlannerData();
+            closePlannerModals();
+            editingId = null;
+            renderPlanner();
+        }
+
+
+        function saveGoal() {
+            const text = document.getElementById("goalInput").value.trim();
+            if (!text) return;
+
+            const goals = getDayGoals(selectedDay);
+
+            if (editingId) {
+                const goal = goals.find(function(g) { return g.id === editingId; });
+                if (goal) goal.text = text;
+            } else {
+                goals.push({ id: createId("goal"), text: text, completed: false });
+            }
+
+            savePlannerData();
+            closePlannerModals();
+            editingId = null;
+            renderPlanner();
+        }
+
+
+        function saveLesson() {
+            const name = document.getElementById("lessonName").value.trim();
+            if (!name) {
+                alert(translations[currentLang].fillAlert);
+                return;
+            }
+
+            const lesson = {
+                id: editingId || createId("lesson"),
+                name: name,
+                teacher: document.getElementById("lessonTeacher").value,
+                date: document.getElementById("lessonDate").value,
+                number: document.getElementById("lessonNumber").value,
+                term: document.getElementById("lessonTerm").value,
+                location: document.getElementById("lessonLocation").value,
+                price: document.getElementById("lessonPrice").value,
+                notes: document.getElementById("lessonNotes").value,
+                completed: false
+            };
+
+            if (editingId) {
+                const index = plannerData.lessons.findIndex(function(l) { return l.id === editingId; });
+                if (index !== -1) {
+                    lesson.completed = plannerData.lessons[index].completed;
+                    plannerData.lessons[index] = lesson;
+                }
+            } else {
+                plannerData.lessons.push(lesson);
+            }
+
+            savePlannerData();
+            closePlannerModals();
+            editingId = null;
+            renderPlanner();
+        }
+
+
+        function saveNote() {
+            const title = document.getElementById("noteTitle").value.trim();
+            const content = document.getElementById("noteContent").value.trim();
+
+            if (!title && !content) return;
+
+            const note = {
+                id: editingId || createId("note"),
+                title: title,
+                content: content,
+                createdAt: new Date().toISOString()
+            };
+
+            if (editingId) {
+                const index = plannerData.notes.findIndex(function(n) { return n.id === editingId; });
+                if (index !== -1) {
+                    plannerData.notes[index] = note;
+                }
+            } else {
+                plannerData.notes.unshift(note);
+            }
+
+            savePlannerData();
+            closePlannerModals();
+            editingId = null;
+            renderPlanner();
+        }
+
+
+        // =========================================================
+        // ربط الأزرار
+        // =========================================================
+
+        function setupPlannerEvents() {
+            if (document.body.dataset.plannerEventsReady === "true") return;
+            document.body.dataset.plannerEventsReady = "true";
+
+            document.getElementById("addScheduleItem").addEventListener("click", function() { openTaskModal(); });
+            document.getElementById("addGoalBtn").addEventListener("click", function() { openGoalModal(); });
+            document.getElementById("addLessonBtn").addEventListener("click", function() { openLessonModal(); });
+            document.getElementById("addTermLessonBtn").addEventListener("click", function() { openLessonModal(); });
+            document.getElementById("addNoteBtn").addEventListener("click", function() { openNoteModal(); });
+            document.getElementById("addDayActivity").addEventListener("click", function() { openTaskModal(); });
+
+            document.getElementById("plannerTodayBtn").addEventListener("click", function() {
+                selectedDay = getCurrentDay();
+                localStorage.setItem("selectedPlannerDay", selectedDay);
+                renderPlanner();
+            });
+
+            document.getElementById("saveTaskBtn").addEventListener("click", saveTask);
+            document.getElementById("saveGoalBtn").addEventListener("click", saveGoal);
+            document.getElementById("saveLessonBtn").addEventListener("click", saveLesson);
+            document.getElementById("saveNoteBtn").addEventListener("click", saveNote);
+
+            document.querySelectorAll("[data-close-planner-modal]").forEach(function(btn) {
+                btn.addEventListener("click", closePlannerModals);
+            });
+
+            document.querySelectorAll(".planner-modal").forEach(function(modal) {
+                modal.addEventListener("click", function(e) {
+                    if (e.target === modal) {
+                        closePlannerModals();
+                    }
+                });
+            });
+        }
+
+
+        // =========================================================
+        // تهيئة Planner
+        // =========================================================
+
+        function initializePlanner() {
+            if (plannerInitialized) return;
+            plannerInitialized = true;
+
+            setupPlannerEvents();
+            renderPlanner();
+
+            setInterval(updateClock, 10000);
+
+            // =========================================================
+            // نظام الإشعارات الصوتية (قبل الموعد بـ 10 دقائق)
+            // =========================================================
+
+            function checkNotifications() {
+                const now = new Date();
+                const currentTime = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2,
+                    "0");
+
+                for (const day in plannerData.schedule) {
+                    const items = plannerData.schedule[day] || [];
+                    items.forEach(function(item) {
+                        if (!item.startTime || item.completed) return;
+
+                        const [hours, minutes] = item.startTime.split(":").map(Number);
+                        const targetDate = new Date(now);
+                        targetDate.setHours(hours, minutes, 0, 0);
+                        targetDate.setMinutes(targetDate.getMinutes() - 10);
+
+                        const targetTime = String(targetDate.getHours()).padStart(2, "0") + ":" +
+                            String(targetDate.getMinutes()).padStart(2, "0");
+
+                        if (currentTime === targetTime) {
+                            sendNotification(item.name, item.startTime, day);
+                        }
+                    });
+                }
+            }
+
+            function sendNotification(name, time, day) {
+                const dayName = translations[currentLang][day] || day;
+                const title = "🔔 تذكير: " + name;
+                const body = "موعدك اليوم " + dayName + " الساعة " + time + " (بعد 10 دقائق)";
+
+                playNotificationSound();
+
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                        icon: "📅",
+                        silent: false
+                    });
+                } else if ("Notification" in window && Notification.permission === "default") {
+                    Notification.requestPermission();
+                }
+
+                alert("🔔 " + title + "\n" + body);
+            }
+
+            function playNotificationSound() {
+                try {
+                    const audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 800;
+                    oscillator.type = "sine";
+                    gainNode.gain.value = 0.3;
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+
+                    setTimeout(function() {
+                        const osc2 = audioContext.createOscillator();
+                        const gain2 = audioContext.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioContext.destination);
+                        osc2.frequency.value = 1000;
+                        osc2.type = "sine";
+                        gain2.gain.value = 0.3;
+                        osc2.start();
+                        osc2.stop(audioContext.currentTime + 0.3);
+                    }, 400);
+
+                } catch (e) {
+                    console.log("Sound not supported");
+                }
+            }
+
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+
+            checkNotifications();
+            setInterval(checkNotifications, 30000);
+        }
+
+
+        // =========================================================
+        // تشغيل اللغة
+        // =========================================================
+
+        changeLanguage("ar");
+
+
+        // =========================================================
+        // التحقق من وجود حساب
+        // =========================================================
+
+        const savedAccount = localStorage.getItem("userAccount");
+        if (savedAccount && profilePage && !profilePage.classList.contains("hidden")) {
+            initializePlanner();
+        }
+
+
+        console.log("✅ Table Planner Loaded successfully!");
+        console.log("📺 YouTube Channel:", YOUTUBE_CHANNEL_URL);
+        console.log("📅 Current Day:", getCurrentDay());
+        console.log("📊 Data:", plannerData);
+
+
+        window.TablePlanner = {
+            getData: function() { return plannerData; },
+            save: function() { savePlannerData(); },
+            refresh: function() { renderPlanner(); },
+            selectDay: function(day) {
+                if (days.some(function(d) { return d.id === day; })) {
+                    selectedDay = day;
+                    localStorage.setItem("selectedPlannerDay", day);
+                    renderPlanner();
+                }
+            }
+        };
+    </script>
+
+</body>
+
+</html>
