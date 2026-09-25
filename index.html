@@ -691,7 +691,6 @@ body.ltr .day-pick-btn{text-align:left}
 
 .auth-box>p{margin:0 0 22px;color:var(--muted);line-height:1.7}
 
-/* تبويبات تسجيل دخول / حساب جديد */
 .auth-tabs{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -767,6 +766,78 @@ body.ltr .day-pick-btn{text-align:left}
   .auth-box{padding:24px;border-radius:25px}
   .auth-box h1{font-size:24px}
 }
+
+/* ===== إعدادات الإشعارات ===== */
+.notif-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  margin-bottom:10px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.notif-item:hover{
+  border-color:rgba(24,215,255,.35);
+  background:rgba(24,215,255,.06);
+  transform:translateY(-2px);
+}
+
+.notif-item.playing{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(24,215,255,.15);
+}
+
+.notif-item .notif-icon{
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  background:rgba(24,215,255,.12);
+  font-size:19px;
+  flex-shrink:0;
+}
+
+.notif-item .notif-main{flex:1;min-width:0}
+
+.notif-item .notif-main b{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.notif-item .notif-main small{color:var(--muted);font-size:12px}
+
+.notif-item .notif-play{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:0;
+  background:linear-gradient(135deg,#0dc9ee,#1387ff);
+  color:#001219;
+  display:grid;
+  place-items:center;
+  font-size:15px;
+  flex-shrink:0;
+}
+
+.notif-disabled-note{
+  padding:14px;
+  border-radius:14px;
+  background:rgba(255,209,102,.08);
+  border:1px solid rgba(255,209,102,.2);
+  color:#ffd86f;
+  font-size:12px;
+  margin-bottom:14px;
+  text-align:center;
+}
 </style>
 
 </head>
@@ -784,7 +855,6 @@ body.ltr .day-pick-btn{text-align:left}
 
     <p id="authDesc" data-i18n="authDesc">سجّل دخولك علشان تحفظ جدولك ومهامك.</p>
 
-    <!-- تبويبات: دخول / حساب جديد -->
     <div class="auth-tabs" id="authTabs">
 
       <button type="button" class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')" data-i18n="tabLogin">تسجيل الدخول</button>
@@ -795,7 +865,6 @@ body.ltr .day-pick-btn{text-align:left}
 
     <form id="loginForm">
 
-      <!-- خانة الاسم — تظهر بس في الحساب الجديد -->
       <div class="auth-field hidden" id="nameField">
 
         <label data-i18n="fullNameLabel">الاسم</label>
@@ -1000,6 +1069,42 @@ body.ltr .day-pick-btn{text-align:left}
       <button class="ghost" onclick="clearNotifications()" data-i18n="clearAll">مسح الكل</button>
     </div>
 
+    <!-- ===== إعدادات الإشعارات جوه الصفحة ===== -->
+    <div class="card panel" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:14px">
+        <div>
+          <b data-i18n="setNotif">التنبيهات</b>
+          <small data-i18n="setNotifDesc" style="display:block;color:var(--muted);margin-top:4px">تشغيل/إيقاف الإشعارات والصوت</small>
+        </div>
+        <button class="switch on" id="notifySwitch" onclick="toggleSetting('notify')"><i></i></button>
+      </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-bottom:14px">
+        <b data-i18n="setSound">صوت الإشعار</b>
+        <small data-i18n="setSoundDesc" style="display:block;color:var(--muted);margin:4px 0 10px">اختر نغمة من جهازك أو استخدم الافتراضية</small>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="file" id="soundFileInput" accept="audio/*" style="display:none" onchange="loadCustomSound(event)">
+          <button class="ghost" onclick="document.getElementById('soundFileInput').click()" data-i18n="uploadSound">📁 رفع نغمة من الجهاز</button>
+          <button class="ghost" onclick="testSound()" data-i18n="testSound">🔊 تجربة الصوت</button>
+          <button class="danger" onclick="resetSound()" data-i18n="resetSound">استخدام الافتراضي</button>
+        </div>
+
+        <div id="soundName" style="color:var(--muted);font-size:12px;margin-top:9px"></div>
+      </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px">
+        <b data-i18n="setReminder">التنبيه قبل المهمة</b>
+        <small data-i18n="setReminderDesc" style="display:block;color:var(--muted);margin:4px 0 10px">اكتب عدد الدقايق قبل المهمة اللي عايز تتنبه فيها</small>
+
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="reminderMinutes" type="number" min="0" max="600" value="10" style="width:130px">
+          <span style="color:var(--muted);font-size:13px" data-i18n="minutes">دقيقة</span>
+          <button class="primary" onclick="saveReminder()" data-i18n="save">حفظ</button>
+        </div>
+      </div>
+    </div>
+
     <div class="card panel" id="notificationsList"></div>
 
   </section>
@@ -1036,27 +1141,9 @@ body.ltr .day-pick-btn{text-align:left}
       <div class="card setting">
         <div>
           <b data-i18n="setNotif">التنبيهات</b>
-          <small data-i18n="setNotifDesc">إظهار تنبيه عند إضافة عناصر جديدة</small>
+          <small data-i18n="setNotifDesc">تشغيل/إيقاف الإشعارات والصوت</small>
         </div>
-        <button class="switch on" id="notifySwitch" onclick="toggleSetting('notify')"><i></i></button>
-      </div>
-
-      <div class="card setting">
-        <div>
-          <b data-i18n="setAuto">الحفظ التلقائي</b>
-          <small data-i18n="setAutoDesc">كل بياناتك محفوظة على الجهاز</small>
-        </div>
-        <button class="switch on"><i></i></button>
-      </div>
-
-      <div class="card setting">
-        <div>
-          <div>
-            <b data-i18n="setData">إدارة البيانات</b>
-            <small data-i18n="setDataDesc">تقدر تمسح كل بيانات الجدول وتبدأ من جديد</small>
-          </div>
-        </div>
-        <button class="danger" onclick="resetData()" data-i18n="clearData">مسح البيانات</button>
+        <button class="switch on" id="notifySwitch2" onclick="toggleSetting('notify')"><i></i></button>
       </div>
 
     </div>
@@ -1107,7 +1194,6 @@ const I18N={
 
     logout:'تسجيل خروج',
 
-    /* تبويبات الدخول */
     tabLogin:'تسجيل الدخول',
     tabSignup:'حساب جديد',
 
@@ -1127,7 +1213,6 @@ const I18N={
 
     chooseGrade:'اختر المرحلة',
 
-    /* المراحل الدراسية */
     grade4p:'الصف الرابع الابتدائي',
     grade5p:'الصف الخامس الابتدائي',
     grade6p:'الصف السادس الابتدائي',
@@ -1178,7 +1263,22 @@ const I18N={
     namePlaceholder:'اكتب اسمك',
 
     setNotif:'التنبيهات',
-    setNotifDesc:'إظهار تنبيه عند إضافة عناصر جديدة',
+    setNotifDesc:'تشغيل/إيقاف الإشعارات والصوت',
+
+    setSound:'صوت الإشعار',
+    setSoundDesc:'اختر نغمة من جهازك أو استخدم الافتراضية',
+    uploadSound:'📁 رفع نغمة من الجهاز',
+    testSound:'🔊 تجربة الصوت',
+    resetSound:'استخدام الافتراضي',
+
+    setReminder:'التنبيه قبل المهمة',
+    setReminderDesc:'اكتب عدد الدقايق قبل المهمة اللي عايز تتنبه فيها',
+    minutes:'دقيقة',
+
+    notifDisabled:'الإشعارات مقفولة. فعّلها من الإعدادات.',
+    tasksReminders:'تذكيرات المهام',
+    before:'قبل',
+    atTime:'في وقت المهمة',
 
     setAuto:'الحفظ التلقائي',
     setAutoDesc:'كل بياناتك محفوظة على الجهاز',
@@ -1291,7 +1391,13 @@ const I18N={
       confirmDel:'هل تريد حذف هذا العنصر؟',
       confirmReset:'سيتم حذف المهام والأهداف والدروس والملاحظات. هل أنت متأكد؟',
       addedNotif:'تمت إضافة ',
-      editedNotif:'تم تعديل '
+      editedNotif:'تم تعديل ',
+      soundLoaded:'تم تحميل النغمة بنجاح',
+      soundReset:'تم استخدام الصوت الافتراضي',
+      reminderSaved:'تم حفظ وقت التنبيه',
+      customSoundActive:'✅ نغمة مخصصة مُفعّلة',
+      defaultSoundActive:'🔔 الصوت الافتراضي',
+      notifSettings:'⚙️ إعدادات الإشعارات'
     }
   },
 
@@ -1314,7 +1420,6 @@ const I18N={
 
     logout:'Logout',
 
-    /* tabs */
     tabLogin:'Sign In',
     tabSignup:'Sign Up',
 
@@ -1334,7 +1439,6 @@ const I18N={
 
     chooseGrade:'Choose grade',
 
-    /* grades */
     grade4p:'4th Primary',
     grade5p:'5th Primary',
     grade6p:'6th Primary',
@@ -1385,7 +1489,22 @@ const I18N={
     namePlaceholder:'Enter your name',
 
     setNotif:'Notifications',
-    setNotifDesc:'Show a toast when new items are added',
+    setNotifDesc:'Enable/disable notifications and sound',
+
+    setSound:'Notification Sound',
+    setSoundDesc:'Choose a sound from your device or use default',
+    uploadSound:'📁 Upload Sound',
+    testSound:'🔊 Test Sound',
+    resetSound:'Use Default',
+
+    setReminder:'Reminder Before Task',
+    setReminderDesc:'Enter how many minutes before the task to be notified',
+    minutes:'minutes',
+
+    notifDisabled:'Notifications are off. Enable from settings.',
+    tasksReminders:'Task Reminders',
+    before:'before',
+    atTime:'at task time',
 
     setAuto:'Auto Save',
     setAutoDesc:'All your data is saved on your device',
@@ -1498,7 +1617,13 @@ const I18N={
       confirmDel:'Delete this item?',
       confirmReset:'All tasks, goals, lessons and notes will be deleted. Are you sure?',
       addedNotif:'Added ',
-      editedNotif:'Edited '
+      editedNotif:'Edited ',
+      soundLoaded:'Sound loaded successfully',
+      soundReset:'Default sound restored',
+      reminderSaved:'Reminder time saved',
+      customSoundActive:'✅ Custom sound active',
+      defaultSoundActive:'🔔 Default sound',
+      notifSettings:'⚙️ Notification Settings'
     }
   }
 };
@@ -1534,7 +1659,6 @@ function applyLang(){
     if(t[k])el.textContent=t[k];
   });
 
-  // placeholders
   document.querySelectorAll('[data-i18n-attr]').forEach(el=>{
     const [attr,key]=el.dataset.i18nAttr.split(':');
     if(t[key])el.setAttribute(attr,t[key]);
@@ -1578,6 +1702,8 @@ let data=JSON.parse(localStorage.getItem(KEY)||'null')||{
   phone:'',
   grade:'',
   notify:true,
+  reminderMinutes:10,
+  customSound:null,
   events:[],
   goals:[],
   lessons:[],
@@ -1585,6 +1711,10 @@ let data=JSON.parse(localStorage.getItem(KEY)||'null')||{
   weekStart:null,
   notifications:[]
 };
+
+if(data.reminderMinutes === undefined) data.reminderMinutes = 10;
+if(data.customSound === undefined) data.customSound = null;
+if(data.notify === undefined) data.notify = true;
 
 function save(){
   localStorage.setItem(KEY,JSON.stringify(data));
@@ -1619,7 +1749,6 @@ function switchAuthTab(mode){
 
   document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
 
-  // خانات الاسم والمرحلة تظهر بس في الحساب الجديد
   document.getElementById('nameField').classList.toggle('hidden', mode!=='signup');
 
   document.getElementById('gradeField').classList.toggle('hidden', mode!=='signup');
@@ -1696,7 +1825,6 @@ document.getElementById('loginForm').addEventListener('submit',function(e){
   const users=getUsers();
 
   if(authMode==='signup'){
-    /* حساب جديد */
     if(!name){err.textContent=t.fillName;return}
 
     if(!grade){err.textContent=t.chooseGradeErr;return}
@@ -1726,7 +1854,6 @@ document.getElementById('loginForm').addEventListener('submit',function(e){
     toast(T().toasts.accountCreated);
 
   }else{
-    /* تسجيل دخول */
     if(!users[phone]){err.textContent=t.phoneNotReg;return}
 
     if(users[phone].password!==pass){err.textContent=t.wrongPass;return}
@@ -1847,12 +1974,263 @@ function addNotification(text){
   }
 }
 
-function renderNotifications(){
-  const t=T();
+/* ============================================================
+   أصوات الإشعارات
+   ============================================================ */
+let notificationAudioCtx = null;
 
-  document.getElementById('notificationsList').innerHTML=data.notifications.length
-    ?'<div class="list">'+data.notifications.map(n=>`<div class="row-item"><div class="row-main"><b>${esc(n.text)}</b><small>${esc(n.date)}</small></div><span class="badge ${n.read?'':'gold'}">${n.read?t.read:t.new}</span></div>`).join('')+'</div>'
-    :'<div class="empty">'+t.noNotifs+'</div>';
+function playNotificationSound(){
+  if(!data.notify) return;
+
+  try{
+    if(data.customSound){
+      const a = new Audio(data.customSound);
+      a.volume = 1;
+      a.play().catch(e=>console.log('audio error', e));
+      return;
+    }
+
+    if(!notificationAudioCtx){
+      notificationAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const ctx = notificationAudioCtx;
+
+    if(ctx.state === 'suspended'){
+      ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+
+    const playBeep = (freq, start, dur) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.3, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+
+      osc.start(start);
+      osc.stop(start + dur);
+    };
+
+    playBeep(880, now, 0.15);
+    playBeep(1100, now + 0.18, 0.15);
+    playBeep(880, now + 0.36, 0.2);
+
+  }catch(e){
+    console.log('sound error', e);
+  }
+}
+
+function loadCustomSound(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  if(file.size > 2 * 1024 * 1024){
+    alert(lang==='ar' ? 'الملف كبير جدًا. أقصى حجم 2 ميجا.' : 'File too large. Max 2MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    data.customSound = e.target.result;
+    save();
+    renderSoundName();
+    toast(T().toasts.soundLoaded);
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function resetSound(){
+  data.customSound = null;
+  save();
+  renderSoundName();
+  toast(T().toasts.soundReset);
+}
+
+function testSound(){
+  const wasNotify = data.notify;
+  data.notify = true;
+  playNotificationSound();
+  data.notify = wasNotify;
+}
+
+function saveReminder(){
+  const v = Number(document.getElementById('reminderMinutes').value) || 0;
+  data.reminderMinutes = Math.max(0, Math.min(600, v));
+  save();
+  toast(T().toasts.reminderSaved);
+}
+
+function saveModalReminder(){
+  const v = Number(document.getElementById('modalReminderInput').value) || 0;
+  data.reminderMinutes = Math.max(0, Math.min(600, v));
+  save();
+  toast(T().toasts.reminderSaved);
+}
+
+function renderSoundName(){
+  const el1 = document.getElementById('soundName');
+  const el2 = document.getElementById('modalSoundName');
+  const txt = data.customSound ? T().toasts.customSoundActive : T().toasts.defaultSoundActive;
+  if(el1) el1.textContent = txt;
+  if(el2) el2.textContent = txt;
+}
+
+function toggleModalNotify(){
+  data.notify = !data.notify;
+
+  const s1 = document.getElementById('modalNotifySwitch');
+  if(s1) s1.classList.toggle('on', data.notify);
+
+  document.querySelectorAll('#notifySwitch, #notifySwitch2').forEach(el=>{
+    el.classList.toggle('on', data.notify);
+  });
+
+  save();
+}
+
+function playAndHighlight(el){
+  if(!data.notify){
+    toast(T().notifDisabled);
+    return;
+  }
+
+  playNotificationSound();
+
+  document.querySelectorAll('.notif-item.playing').forEach(x=>x.classList.remove('playing'));
+  if(el) el.classList.add('playing');
+  setTimeout(()=>{ if(el) el.classList.remove('playing'); }, 1500);
+
+  const title = el ? (el.querySelector('.notif-main b')?.textContent || '') : '';
+  openNotifQuickMenu(title);
+}
+
+function openNotifQuickMenu(title){
+  const t = T();
+
+  const body = document.getElementById('modalBody');
+  document.getElementById('modalTitle').textContent = title || t.notifSettings;
+
+  body.innerHTML = `
+    <div class="form-grid">
+
+      <div class="field full">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)">
+          <div>
+            <b>${t.setNotif}</b>
+            <small style="display:block;color:var(--muted);margin-top:3px;font-size:11px">${t.setNotifDesc}</small>
+          </div>
+          <button class="switch ${data.notify?'on':''}" id="modalNotifySwitch" onclick="toggleModalNotify()"><i></i></button>
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>${t.setSound}</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="file" id="modalSoundInput" accept="audio/*" style="display:none" onchange="loadCustomSound(event)">
+          <button class="ghost" onclick="document.getElementById('modalSoundInput').click()">${t.uploadSound}</button>
+          <button class="ghost" onclick="testSound()">${t.testSound}</button>
+          <button class="danger" onclick="resetSound()">${t.resetSound}</button>
+        </div>
+        <div id="modalSoundName" style="color:var(--muted);font-size:12px;margin-top:9px">
+          ${data.customSound ? t.toasts.customSoundActive : t.toasts.defaultSoundActive}
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>${t.setReminder}</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="modalReminderInput" type="number" min="0" max="600" value="${data.reminderMinutes||10}" style="flex:1">
+          <span style="color:var(--muted);font-size:13px">${t.minutes}</span>
+          <button class="primary" onclick="saveModalReminder()">${t.save}</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">${t.cancel}</button>
+    </div>
+  `;
+
+  document.getElementById('modalWrap').classList.add('show');
+}
+
+function renderNotifications(){
+  const t = T();
+
+  const list = document.getElementById('notificationsList');
+
+  if(!data.notify){
+    list.innerHTML = `<div class="notif-disabled-note">🔕 ${t.notifDisabled}</div>`;
+    return;
+  }
+
+  const upcoming = [...data.events].sort((a,b)=>{
+    const dayA = t.weekDays.indexOf(a.day);
+    const dayB = t.weekDays.indexOf(b.day);
+    if(dayA !== dayB) return dayA - dayB;
+    return (Number(a.fromH)||0) - (Number(b.fromH)||0);
+  });
+
+  let html = '';
+
+  if(upcoming.length){
+    html += `<div style="margin-bottom:16px">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">${t.tasksReminders}</div>`;
+
+    html += upcoming.map(e=>{
+      const reminder = data.reminderMinutes || 0;
+      const timeStr = `${e.fromH||'--'}:${e.fromM||'--'} ${t[e.fromAP]||''}`;
+      const reminderStr = reminder > 0
+        ? `⏰ ${t.before} ${reminder} ${t.minutes}`
+        : `⏰ ${t.atTime}`;
+
+      return `<div class="notif-item" onclick="playAndHighlight(this)" data-id="${e.id}">
+        <div class="notif-icon">🔔</div>
+        <div class="notif-main">
+          <b>${esc(e.title)}</b>
+          <small>${e.day} • ${timeStr} • ${reminderStr}</small>
+        </div>
+        <button class="notif-play" onclick="event.stopPropagation(); playAndHighlight(this.parentElement)">▶</button>
+      </div>`;
+    }).join('');
+
+    html += `</div>`;
+  }
+
+  if(data.notifications.length){
+    html += `<div style="margin-bottom:10px">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">${t.notifsTitle}</div>`;
+
+    html += data.notifications.map(n=>`
+      <div class="row-item">
+        <div class="row-main">
+          <b>${esc(n.text)}</b>
+          <small>${esc(n.date)}</small>
+        </div>
+        <span class="badge ${n.read?'':'gold'}">${n.read?t.read:t.new}</span>
+      </div>
+    `).join('');
+
+    html += `</div>`;
+  }
+
+  if(!upcoming.length && !data.notifications.length){
+    html = `<div class="empty">${t.noNotifs}</div>`;
+  }
+
+  list.innerHTML = html;
 }
 
 function clearNotifications(){
@@ -2329,7 +2707,6 @@ function saveName(){
   if(n){
     data.name=n;
 
-    // تحديث الاسم في المستخدمين كذلك
     const phone=localStorage.getItem(AUTH_KEY);
     if(phone){
       const users=getUsers();
@@ -2347,9 +2724,18 @@ function saveName(){
 function toggleSetting(k){
   data[k]=!data[k];
 
-  document.getElementById('notifySwitch').classList.toggle('on',data[k]);
+  document.querySelectorAll('#notifySwitch, #notifySwitch2, #modalNotifySwitch').forEach(el=>{
+    el.classList.toggle('on', data[k]);
+  });
 
   save();
+
+  if(!data.notify){
+    if(notificationAudioCtx){
+      try{ notificationAudioCtx.close(); }catch(e){}
+      notificationAudioCtx = null;
+    }
+  }
 }
 
 function resetData(){
@@ -2380,7 +2766,17 @@ function renderAll(){
 
   document.getElementById('nameInput').value=data.name||'';
 
-  document.getElementById('notifySwitch').classList.toggle('on',data.notify);
+  document.querySelectorAll('#notifySwitch, #notifySwitch2').forEach(el=>{
+    el.classList.toggle('on', data.notify);
+  });
+
+  const remInput = document.getElementById('reminderMinutes');
+  if(remInput) remInput.value = data.reminderMinutes || 10;
+
+  const remInput2 = document.getElementById('modalReminderInput');
+  if(remInput2) remInput2.value = data.reminderMinutes || 10;
+
+  renderSoundName();
 
   renderHome();
   renderGoals();
